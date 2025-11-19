@@ -63,6 +63,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
+      setShowDeleteDialog(false);
     } else if (open && !client) {
       form.reset({
         companyName: "",
@@ -80,6 +81,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         linkedin: "",
         notes: "",
       });
+      setShowDeleteDialog(false);
+    } else if (!open) {
+      setShowDeleteDialog(false);
     }
   }, [open, client]);
 
