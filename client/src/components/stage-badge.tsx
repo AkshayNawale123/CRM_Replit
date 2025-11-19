@@ -48,10 +48,10 @@ export function StageBadge({ stage }: StageBadgeProps) {
   return (
     <Badge 
       variant="secondary" 
-      className={`inline-flex items-center gap-1.5 ${styles.bgColor} ${styles.darkBgColor} font-medium`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs ${styles.bgColor} ${styles.darkBgColor} font-medium`}
       data-testid={`badge-stage-${stage.toLowerCase().replace(/\s+/g, '-')}`}
     >
-      <Circle className={`h-2 w-2 fill-current ${styles.dotColor}`} />
+      <Circle className={`h-1.5 w-1.5 fill-current ${styles.dotColor}`} />
       <span>{stage}</span>
     </Badge>
   );

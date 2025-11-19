@@ -37,7 +37,7 @@ export function PriorityBadge({ priority }: PriorityBadgeProps) {
   return (
     <Badge 
       variant="outline"
-      className={`${styles.bgColor} ${styles.darkBgColor} font-medium uppercase text-xs`}
+      className={`${styles.bgColor} ${styles.darkBgColor} font-medium uppercase text-xs px-2 py-0.5`}
       data-testid={`badge-priority-${priority.toLowerCase()}`}
     >
       {priority}

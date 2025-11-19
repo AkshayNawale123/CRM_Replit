@@ -45,10 +45,10 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <Badge 
       variant="secondary"
-      className={`inline-flex items-center gap-1.5 ${config.bgColor} ${config.darkBgColor} font-medium`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs ${config.bgColor} ${config.darkBgColor} font-medium`}
       data-testid={`badge-status-${status.toLowerCase().replace(/\s+/g, '-')}`}
     >
-      {Icon && <Icon className="h-3 w-3" />}
+      {Icon && <Icon className="h-2.5 w-2.5" />}
       <span>{status}</span>
     </Badge>
   );
