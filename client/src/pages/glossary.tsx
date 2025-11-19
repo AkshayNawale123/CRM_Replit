@@ -1,7 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Navigation } from "@/components/navigation";
+import { useState, useEffect } from "react";
 
 export default function Glossary() {
+  const [activeSection, setActiveSection] = useState<string>("primary-stages");
+
   const primaryStages = [
     {
       stage: "Lead",
@@ -69,108 +73,190 @@ export default function Glossary() {
     }
   ];
 
+  const scrollToSection = (id: string) => {
+    setActiveSection(id);
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const indexItems = [
+    { id: "primary-stages", label: "Sales Pipeline Stages" },
+    { id: "additional-stages", label: "Alternative & Additional Stages" },
+    { id: "bant-framework", label: "BANT Framework" }
+  ];
+
+  // Track visible sections with IntersectionObserver
+  useEffect(() => {
+    let observer: IntersectionObserver | null = null;
+
+    // Small delay to ensure DOM elements are rendered
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id);
+            }
+          });
+        },
+        {
+          rootMargin: '-100px 0px -60% 0px',
+          threshold: 0
+        }
+      );
+
+      const sectionIds = ['primary-stages', 'additional-stages', 'bant-framework'];
+      sectionIds.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element && observer) {
+          observer.observe(element);
+        }
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto p-6 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground" data-testid="heading-glossary">
-            CRM Glossary
-          </h1>
-          <p className="text-muted-foreground">
-            Standard sales pipeline stages and definitions to help you manage client relationships effectively
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Sales Pipeline Stages</CardTitle>
-            <CardDescription>
-              The primary stages that guide a prospect through your sales process from initial contact to close
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {primaryStages.map((item, index) => (
-              <div 
-                key={item.badge} 
-                className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
-                data-testid={`stage-${item.badge}`}
+      <Navigation />
+      <div className="flex max-w-7xl mx-auto">
+        {/* Left-hand Index */}
+        <aside className="hidden md:block w-64 flex-shrink-0 p-6 sticky top-0 h-screen overflow-y-auto">
+          <div className="space-y-1">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Table of Contents</h3>
+            {indexItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  activeSection === item.id
+                    ? 'bg-primary text-primary-foreground font-medium'
+                    : 'text-muted-foreground hover-elevate'
+                }`}
+                data-testid={`index-${item.id}`}
               >
-                <div className="flex-shrink-0 w-8 text-center">
-                  <Badge variant="outline" className="rounded-full h-8 w-8 flex items-center justify-center">
-                    {index + 1}
-                  </Badge>
-                </div>
-                <div className="flex-1 space-y-1">
-                  <h3 className="font-semibold text-foreground">{item.stage}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
+                {item.label}
+              </button>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </aside>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Alternative & Additional Stages</CardTitle>
-            <CardDescription>
-              Optional stages that can be used depending on your business model and sales process
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {additionalStages.map((item, index) => (
-              <div 
-                key={index} 
-                className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
-                data-testid={`additional-stage-${index}`}
-              >
-                <div className="flex-shrink-0 w-8 text-center">
-                  <Badge variant="secondary" className="rounded-full h-8 w-8 flex items-center justify-center">
-                    {index + 10}
-                  </Badge>
+        {/* Main Content */}
+        <main className="flex-1 p-6 space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground" data-testid="heading-glossary">
+              CRM Glossary
+            </h1>
+            <p className="text-muted-foreground">
+              Standard sales pipeline stages and definitions to help you manage client relationships effectively
+            </p>
+          </div>
+
+          <Card id="primary-stages">
+            <CardHeader>
+              <CardTitle className="text-xl">Sales Pipeline Stages</CardTitle>
+              <CardDescription>
+                The primary stages that guide a prospect through your sales process from initial contact to close
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {primaryStages.map((item, index) => (
+                <div 
+                  key={item.badge} 
+                  className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
+                  data-testid={`stage-${item.badge}`}
+                >
+                  <div className="flex-shrink-0 w-8 text-center">
+                    <Badge variant="outline" className="rounded-full h-8 w-8 flex items-center justify-center">
+                      {index + 1}
+                    </Badge>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <h3 className="font-semibold text-foreground">{item.stage}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 space-y-1">
-                  <h3 className="font-semibold text-foreground">{item.stage}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card id="additional-stages">
+            <CardHeader>
+              <CardTitle className="text-xl">Alternative & Additional Stages</CardTitle>
+              <CardDescription>
+                Optional stages that can be used depending on your business model and sales process
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {additionalStages.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
+                  data-testid={`additional-stage-${index}`}
+                >
+                  <div className="flex-shrink-0 w-8 text-center">
+                    <Badge variant="secondary" className="rounded-full h-8 w-8 flex items-center justify-center">
+                      {index + 10}
+                    </Badge>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <h3 className="font-semibold text-foreground">{item.stage}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-muted/50" id="bant-framework">
+            <CardHeader>
+              <CardTitle className="text-lg">Key Sales Qualification Framework</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">BANT Criteria</span> - Use this framework to qualify leads:
+                </p>
+                <ul className="space-y-1.5 ml-4 text-sm text-muted-foreground">
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-foreground min-w-20">Budget:</span>
+                    <span>Does the prospect have allocated funds?</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-foreground min-w-20">Authority:</span>
+                    <span>Are you speaking with decision-makers?</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-foreground min-w-20">Need:</span>
+                    <span>Does your solution address a real pain point?</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-semibold text-foreground min-w-20">Timeline:</span>
+                    <span>When do they plan to make a decision?</span>
+                  </li>
+                </ul>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card className="bg-muted/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Key Sales Qualification Framework</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">BANT Criteria</span> - Use this framework to qualify leads:
-              </p>
-              <ul className="space-y-1.5 ml-4 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground min-w-20">Budget:</span>
-                  <span>Does the prospect have allocated funds?</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground min-w-20">Authority:</span>
-                  <span>Are you speaking with decision-makers?</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground min-w-20">Need:</span>
-                  <span>Does your solution address a real pain point?</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground min-w-20">Timeline:</span>
-                  <span>When do they plan to make a decision?</span>
-                </li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </main>
       </div>
     </div>
   );
