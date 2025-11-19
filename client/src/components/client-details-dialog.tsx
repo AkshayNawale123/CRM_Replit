@@ -1,11 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Calendar, CheckCircle2, Edit, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Client } from "@shared/schema";
 import { PriorityBadge } from "./priority-badge";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientDetailsDialogProps {
   open: boolean;
@@ -15,7 +19,70 @@ interface ClientDetailsDialogProps {
 }
 
 export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: ClientDetailsDialogProps) {
+  const [newActivity, setNewActivity] = useState({ action: "", user: "" });
+  const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   if (!client) return null;
+
+  const addActivityMutation = useMutation({
+    mutationFn: async (activity: { action: string; user: string }) => {
+      const response = await fetch(`/api/clients/${client.id}/activities`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(activity),
+      });
+      if (!response.ok) throw new Error("Failed to add activity");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      setNewActivity({ action: "", user: "" });
+      setIsAddingActivity(false);
+      toast({
+        title: "Activity added",
+        description: "The activity has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add activity. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (activityId: string) => {
+      const response = await fetch(`/api/clients/${client.id}/activities/${activityId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete activity");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Activity deleted",
+        description: "The activity has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete activity. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddActivity = () => {
+    if (newActivity.action.trim() && newActivity.user.trim()) {
+      addActivityMutation.mutate(newActivity);
+    }
+  };
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -156,18 +223,83 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Activity History</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Activity History</h3>
+              {!isAddingActivity && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddingActivity(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Activity
+                </Button>
+              )}
+            </div>
+            
+            {isAddingActivity && (
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Activity Description</label>
+                  <Input
+                    placeholder="e.g., Follow-up call completed"
+                    value={newActivity.action}
+                    onChange={(e) => setNewActivity({ ...newActivity, action: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Your Name</label>
+                  <Input
+                    placeholder="e.g., John Smith"
+                    value={newActivity.user}
+                    onChange={(e) => setNewActivity({ ...newActivity, user: e.target.value })}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleAddActivity}
+                    disabled={!newActivity.action.trim() || !newActivity.user.trim() || addActivityMutation.isPending}
+                    size="sm"
+                  >
+                    {addActivityMutation.isPending ? "Adding..." : "Add"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsAddingActivity(false);
+                      setNewActivity({ action: "", user: "" });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-3">
               {client.activityHistory && client.activityHistory.length > 0 ? (
                 client.activityHistory.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                  <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0 group">
                     <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-foreground">{activity.action}</div>
                       <div className="text-sm text-muted-foreground">by {activity.user}</div>
                     </div>
-                    <div className="text-sm text-muted-foreground whitespace-nowrap">
-                      {activity.date}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-muted-foreground whitespace-nowrap">
+                        {activity.date}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteActivityMutation.mutate(activity.id)}
+                        disabled={deleteActivityMutation.isPending}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
                 ))

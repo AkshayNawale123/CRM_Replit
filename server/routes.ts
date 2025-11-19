@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertClientSchema } from "@shared/schema";
+import { insertClientSchema, addActivitySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients", async (_req, res) => {
@@ -63,6 +63,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete client" });
+    }
+  });
+
+  app.post("/api/clients/:id/activities", async (req, res) => {
+    try {
+      const validatedData = addActivitySchema.parse(req.body);
+      const client = await storage.addActivity(req.params.id, validatedData);
+      if (!client) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+      res.json(client);
+    } catch (error) {
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid activity data", details: error });
+      }
+      res.status(500).json({ error: "Failed to add activity" });
+    }
+  });
+
+  app.delete("/api/clients/:id/activities/:activityId", async (req, res) => {
+    try {
+      const client = await storage.deleteActivity(req.params.id, req.params.activityId);
+      if (!client) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+      res.json(client);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete activity" });
     }
   });
 

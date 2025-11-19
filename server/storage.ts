@@ -7,6 +7,8 @@ export interface IStorage {
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: string, client: InsertClient): Promise<Client | undefined>;
   deleteClient(id: string): Promise<boolean>;
+  addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined>;
+  deleteActivity(clientId: string, activityId: string): Promise<Client | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -180,6 +182,43 @@ export class MemStorage implements IStorage {
 
   async deleteClient(id: string): Promise<boolean> {
     return this.clients.delete(id);
+  }
+
+  async addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined> {
+    const client = this.clients.get(clientId);
+    if (!client) {
+      return undefined;
+    }
+
+    const newActivity = {
+      id: randomUUID(),
+      action: activity.action,
+      user: activity.user,
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    const updatedClient = {
+      ...client,
+      activityHistory: [newActivity, ...(client.activityHistory || [])],
+    };
+
+    this.clients.set(clientId, updatedClient);
+    return updatedClient;
+  }
+
+  async deleteActivity(clientId: string, activityId: string): Promise<Client | undefined> {
+    const client = this.clients.get(clientId);
+    if (!client) {
+      return undefined;
+    }
+
+    const updatedClient = {
+      ...client,
+      activityHistory: (client.activityHistory || []).filter(a => a.id !== activityId),
+    };
+
+    this.clients.set(clientId, updatedClient);
+    return updatedClient;
   }
 }
 

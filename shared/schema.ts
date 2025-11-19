@@ -10,7 +10,13 @@ export const activitySchema = z.object({
   date: z.string(),
 });
 
+export const addActivitySchema = z.object({
+  action: z.string().trim().min(1, "Activity description is required"),
+  user: z.string().trim().min(1, "User name is required"),
+});
+
 export type Activity = z.infer<typeof activitySchema>;
+export type AddActivity = z.infer<typeof addActivitySchema>;
 
 export const clients = pgTable("clients", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
