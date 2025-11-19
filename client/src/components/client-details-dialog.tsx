@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Calendar, CheckCircle2, Edit } from "lucide-react";
+import { Calendar, CheckCircle2, Edit } from "lucide-react";
 import { format } from "date-fns";
 import type { Client } from "@shared/schema";
 import { PriorityBadge } from "./priority-badge";
@@ -56,14 +56,6 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                   Edit
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </DialogHeader>
