@@ -4,7 +4,7 @@ import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
 import { ChevronRight, AlertTriangle } from "lucide-react";
-import { format, isPast, startOfDay } from "date-fns";
+import { format, isPast, startOfDay, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
 
 interface ClientTableProps {
@@ -32,6 +32,13 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
     return isPast(startOfDay(dateObj)) && startOfDay(dateObj).getTime() !== startOfDay(new Date()).getTime();
   };
 
+  const getDaysInPipeline = (createdAt: Date | string) => {
+    const createdDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+    const today = new Date();
+    const days = differenceInDays(today, createdDate);
+    return Math.max(0, days);
+  };
+
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <div className="overflow-x-auto">
@@ -45,13 +52,14 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
               <TableHead className="font-semibold">Last Follow-up</TableHead>
               <TableHead className="font-semibold">Next Follow-up</TableHead>
               <TableHead className="font-semibold">Priority</TableHead>
+              <TableHead className="font-semibold text-center">Days in Pipeline</TableHead>
               <TableHead className="font-semibold text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                   No clients found. Add your first client to get started.
                 </TableCell>
               </TableRow>
@@ -105,6 +113,9 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
                     </TableCell>
                     <TableCell>
                       <PriorityBadge priority={client.priority as any} />
+                    </TableCell>
+                    <TableCell className="text-center font-semibold text-foreground" data-testid={`text-days-pipeline-${client.id}`}>
+                      {getDaysInPipeline(client.createdAt)} days
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
