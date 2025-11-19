@@ -32,22 +32,34 @@ export default function Glossary() {
       badge: "meeting",
     },
     {
+      stage: "Demo Completed",
+      description:
+        "The product demonstration has been successfully delivered and the prospect is evaluating the solution.",
+      badge: "demo",
+    },
+    {
+      stage: "Proof of Concept (POC)",
+      description:
+        "A trial or pilot project is underway to validate the solution before full commitment.",
+      badge: "poc",
+    },
+    {
       stage: "Proposal Sent",
       description:
         "A formal proposal or quote has been delivered to the prospect outlining the solution, pricing, and terms.",
       badge: "proposal",
     },
     {
-      stage: "In Negotiation",
-      description:
-        "Active discussions are happening around pricing, terms, contract details, or customizations to close the deal.",
-      badge: "negotiation",
-    },
-    {
       stage: "Verbal Commitment",
       description:
         "The prospect has verbally agreed to move forward but formal contracts haven't been signed yet.",
       badge: "verbal",
+    },
+    {
+      stage: "Contract Review",
+      description:
+        "Legal teams are reviewing and finalizing contract terms before signing.",
+      badge: "contract",
     },
     {
       stage: "Won",
@@ -61,34 +73,50 @@ export default function Glossary() {
         "The deal didn't close - the prospect chose a competitor, had budget issues, or decided not to proceed.",
       badge: "lost",
     },
+  ];
+
+  const statusDefinitions = [
     {
-      stage: "On Hold",
+      status: "In Negotiation",
+      description:
+        "Active discussions are happening around pricing, terms, contract details, or customizations to close the deal.",
+      badge: "negotiation",
+    },
+    {
+      status: "Proposal Rejected",
+      description:
+        "The client declined the initial proposal and revisions or new approaches are needed.",
+      badge: "rejected",
+    },
+    {
+      status: "On Hold",
       description:
         "The opportunity is temporarily paused due to timing, budget cycles, or internal changes at the prospect's company.",
       badge: "hold",
     },
-  ];
-
-  const additionalStages = [
     {
-      stage: "Demo Completed",
+      status: "Pending Review",
       description:
-        "The product demonstration has been successfully delivered and the prospect is evaluating the solution.",
+        "Documents, contracts, or proposals are being reviewed by the client's team before moving forward.",
+      badge: "pending",
     },
     {
-      stage: "Proof of Concept (POC)",
+      status: "Awaiting Response",
       description:
-        "A trial or pilot project is underway to validate the solution before full commitment.",
+        "Waiting for the client to respond to a proposal, question, or request for information.",
+      badge: "awaiting",
     },
     {
-      stage: "Contract Review",
+      status: "Under Evaluation",
       description:
-        "Legal teams are reviewing and finalizing contract terms before signing.",
+        "The client is actively evaluating the solution against alternatives or internal criteria.",
+      badge: "evaluation",
     },
     {
-      stage: "Closed-Lost (Nurture)",
+      status: "Budget Approval Pending",
       description:
-        "The deal didn't close now, but the prospect remains in the pipeline for future opportunities.",
+        "The deal requires budget approval from finance or senior leadership before proceeding.",
+      badge: "budget",
     },
   ];
 
@@ -108,7 +136,8 @@ export default function Glossary() {
 
   const indexItems = [
     { id: "primary-stages", label: "Sales Pipeline Stages" },
-    { id: "additional-stages", label: "Alternative & Additional Stages" },
+    { id: "status-definitions", label: "Status Definitions" },
+    { id: "stage-vs-status", label: "Stage vs Status Classification" },
     { id: "bant-framework", label: "BANT Framework" },
   ];
 
@@ -134,7 +163,8 @@ export default function Glossary() {
 
       const sectionIds = [
         "primary-stages",
-        "additional-stages",
+        "status-definitions",
+        "stage-vs-status",
         "bant-framework",
       ];
       sectionIds.forEach((id) => {
@@ -231,34 +261,33 @@ export default function Glossary() {
             </CardContent>
           </Card>
 
-          <Card id="additional-stages">
+          <Card id="status-definitions">
             <CardHeader>
               <CardTitle className="text-xl">
-                Alternative & Additional Stages
+                Status Definitions
               </CardTitle>
               <CardDescription>
-                Optional stages that can be used depending on your business
-                model and sales process
+                Status indicators show the current negotiation or proposal state within a given sales stage
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {additionalStages.map((item, index) => (
+              {statusDefinitions.map((item, index) => (
                 <div
-                  key={index}
+                  key={item.badge}
                   className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
-                  data-testid={`additional-stage-${index}`}
+                  data-testid={`status-${item.badge}`}
                 >
                   <div className="flex-shrink-0 w-8 text-center">
                     <Badge
                       variant="secondary"
                       className="rounded-full h-8 w-8 flex items-center justify-center"
                     >
-                      {index + 10}
+                      {index + 1}
                     </Badge>
                   </div>
                   <div className="flex-1 space-y-1">
                     <h3 className="font-semibold text-foreground">
-                      {item.stage}
+                      {item.status}
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {item.description}
@@ -266,6 +295,116 @@ export default function Glossary() {
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          <Card id="stage-vs-status">
+            <CardHeader>
+              <CardTitle className="text-xl">
+                Stage vs Status Classification
+              </CardTitle>
+              <CardDescription>
+                Understanding the key difference between Stage and Status for better pipeline tracking
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-foreground mb-3">
+                  Stage (Main sales pipeline progression):
+                </h3>
+                <ul className="space-y-1.5 ml-4 text-sm text-muted-foreground">
+                  <li>Lead</li>
+                  <li>Qualified</li>
+                  <li>Meeting Scheduled</li>
+                  <li>Demo Completed</li>
+                  <li>Proof of Concept (POC)</li>
+                  <li>Proposal Sent</li>
+                  <li>Verbal Commitment</li>
+                  <li>Contract Review</li>
+                  <li>Won</li>
+                  <li>Lost</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-3">
+                  Status (Current negotiation/proposal state):
+                </h3>
+                <ul className="space-y-1.5 ml-4 text-sm text-muted-foreground">
+                  <li>In Negotiation</li>
+                  <li>Proposal Rejected</li>
+                  <li>On Hold</li>
+                  <li>Pending Review</li>
+                  <li>Awaiting Response</li>
+                  <li>Under Evaluation</li>
+                  <li>Budget Approval Pending</li>
+                </ul>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-md space-y-3">
+                <h3 className="font-semibold text-foreground">
+                  Understanding the Difference:
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <p className="text-muted-foreground">
+                    <span className="font-semibold text-foreground">Stage</span> = Where the client is in the overall sales journey (linear progression)
+                  </p>
+                  <ul className="space-y-1 ml-4 text-muted-foreground">
+                    <li>• These are milestone-based and move forward sequentially</li>
+                    <li>• Once you move to "Proposal Sent" stage, you don't go back to "Qualified"</li>
+                  </ul>
+                  
+                  <p className="text-muted-foreground pt-2">
+                    <span className="font-semibold text-foreground">Status</span> = Current situation/blocker within that stage (can change multiple times)
+                  </p>
+                  <ul className="space-y-1 ml-4 text-muted-foreground">
+                    <li>• These describe what's happening RIGHT NOW at the current stage</li>
+                    <li>• A client at "Proposal Sent" stage could have status = "In Negotiation", "Awaiting Response", or "Proposal Rejected"</li>
+                    <li>• Status can fluctuate without changing the stage</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-foreground mb-3">
+                  Real-World Examples:
+                </h3>
+                <div className="space-y-3">
+                  <div className="border-l-2 border-primary pl-4 py-1">
+                    <p className="text-sm font-medium text-foreground">Example 1:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stage: "Proposal Sent" + Status: "In Negotiation" = Actively discussing terms and pricing
+                    </p>
+                  </div>
+                  
+                  <div className="border-l-2 border-primary pl-4 py-1">
+                    <p className="text-sm font-medium text-foreground">Example 2:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stage: "Proposal Sent" + Status: "On Hold" = Proposal delivered but client paused due to Q1 budget freeze
+                    </p>
+                  </div>
+                  
+                  <div className="border-l-2 border-primary pl-4 py-1">
+                    <p className="text-sm font-medium text-foreground">Example 3:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stage: "Proposal Sent" + Status: "Proposal Rejected" = Client declined initial proposal, need to revise and resend
+                    </p>
+                  </div>
+                  
+                  <div className="border-l-2 border-primary pl-4 py-1">
+                    <p className="text-sm font-medium text-foreground">Example 4:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stage: "Verbal Commitment" + Status: "Pending Review" = Client agreed verbally, legal team reviewing contract
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-primary/10 border border-primary/20 p-4 rounded-md">
+                <p className="text-sm font-medium text-foreground">
+                  <span className="font-semibold">Key Insight:</span> This separation gives you better tracking visibility - Stage shows progress through the sales funnel, while Status shows current health/activity at that stage.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
