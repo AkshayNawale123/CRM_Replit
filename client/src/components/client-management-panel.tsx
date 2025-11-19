@@ -41,9 +41,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
       status: "none" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
+      nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
       priority: "Medium" as const,
       responsiblePerson: "",
       country: "",
+      linkedin: "",
       notes: "",
     },
   });
@@ -59,9 +61,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         status: (client.status || "none") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
+        nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
         priority: client.priority as ClientFormData["priority"],
         responsiblePerson: client.responsiblePerson,
         country: client.country,
+        linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
     } else if (mode === 'create') {
@@ -74,9 +78,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         status: "none",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
+        nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
         priority: "Medium",
         responsiblePerson: "",
         country: "",
+        linkedin: "",
         notes: "",
       });
     }
@@ -192,6 +198,14 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                     </div>
                     <div className="text-sm font-medium">{client.responsiblePerson}</div>
                   </div>
+                  {client.linkedin && (
+                    <div className="col-span-2">
+                      <div className="text-sm text-muted-foreground mb-1">LinkedIn</div>
+                      <a href={client.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
+                        {client.linkedin}
+                      </a>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -210,6 +224,13 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       Last Follow-up
                     </div>
                     <div className="text-lg font-semibold">{formatDate(client.lastFollowUp)}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
+                      <Calendar className="h-3 w-3" />
+                      Next Follow-up
+                    </div>
+                    <div className="text-lg font-semibold">{formatDate(client.nextFollowUp)}</div>
                   </div>
                 </div>
               </CardContent>
@@ -466,17 +487,55 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="lastFollowUp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Follow-up</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            value={typeof field.value === 'string' ? field.value : ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="nextFollowUp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Next Follow-up</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            value={typeof field.value === 'string' ? field.value : ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="lastFollowUp"
+                  name="linkedin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Follow-up</FormLabel>
+                      <FormLabel>LinkedIn (Optional)</FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          type="url"
+                          placeholder="https://www.linkedin.com/in/profile" 
                           {...field} 
-                          value={typeof field.value === 'string' ? field.value : ''}
                         />
                       </FormControl>
                       <FormMessage />

@@ -36,9 +36,11 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       status: "none" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
+      nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
       priority: "Medium" as const,
       responsiblePerson: "",
       country: "",
+      linkedin: "",
       notes: "",
     },
   });
@@ -54,9 +56,11 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         status: (client.status || "none") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
+        nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
         priority: client.priority as ClientFormData["priority"],
         responsiblePerson: client.responsiblePerson,
         country: client.country,
+        linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
     } else if (open && !client) {
@@ -69,9 +73,11 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         status: "none",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
+        nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
         priority: "Medium",
         responsiblePerson: "",
         country: "",
+        linkedin: "",
         notes: "",
       });
     }
@@ -320,18 +326,58 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="lastFollowUp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Follow-up</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          value={typeof field.value === 'string' ? field.value : ''}
+                          data-testid="input-last-followup"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="nextFollowUp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Next Follow-up</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          value={typeof field.value === 'string' ? field.value : ''}
+                          data-testid="input-next-followup"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
-                name="lastFollowUp"
+                name="linkedin"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Follow-up</FormLabel>
+                    <FormLabel>LinkedIn (Optional)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="date" 
+                        type="url"
+                        placeholder="https://www.linkedin.com/in/profile" 
                         {...field} 
-                        value={typeof field.value === 'string' ? field.value : ''}
-                        data-testid="input-last-followup"
+                        data-testid="input-linkedin"
                       />
                     </FormControl>
                     <FormMessage />
