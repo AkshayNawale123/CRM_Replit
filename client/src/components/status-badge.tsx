@@ -9,7 +9,6 @@ type Status =
   | "Awaiting Response"
   | "Under Evaluation"
   | "Budget Approval Pending"
-  | ""
   | null;
 
 interface StatusBadgeProps {
