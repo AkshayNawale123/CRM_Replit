@@ -59,6 +59,7 @@ export default function Login({ onLogin }: LoginProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12"
+                  autoComplete="email"
                   data-testid="input-email"
                   required
                 />
@@ -77,6 +78,7 @@ export default function Login({ onLogin }: LoginProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-12 pr-10"
+                    autoComplete="current-password"
                     data-testid="input-password"
                     required
                   />
@@ -84,6 +86,8 @@ export default function Login({ onLogin }: LoginProps) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                     data-testid="button-toggle-password"
                   >
                     {showPassword ? (
@@ -99,7 +103,7 @@ export default function Login({ onLogin }: LoginProps) {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-medium"
+              className="w-full h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-medium"
               data-testid="button-login"
             >
               Sign in
