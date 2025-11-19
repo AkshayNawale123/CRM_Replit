@@ -113,12 +113,12 @@ export default function Dashboard() {
     <div className="flex flex-col h-screen bg-background">
       <Navigation />
       <div className="border-b bg-background">
-        <div className="p-4 md:p-6">
+        <div className="px-4 py-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            <h1 className="text-2xl font-semibold text-foreground">
               Client Portfolio
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               Manage all client relationships and deal pipeline
             </p>
           </div>
