@@ -5,8 +5,27 @@ import { z } from "zod";
 import { relations } from "drizzle-orm";
 
 // PostgreSQL ENUMs for better type safety
-export const stageEnum = pgEnum("stage", ["Lead", "Qualified", "Proposal Sent", "Won"]);
-export const statusEnum = pgEnum("status", ["In Negotiation", "Proposal Rejected", "On Hold"]);
+export const stageEnum = pgEnum("stage", [
+  "Lead",
+  "Qualified",
+  "Meeting Scheduled",
+  "Demo Completed",
+  "Proof of Concept (POC)",
+  "Proposal Sent",
+  "Verbal Commitment",
+  "Contract Review",
+  "Won",
+  "Lost"
+]);
+export const statusEnum = pgEnum("status", [
+  "In Negotiation",
+  "Proposal Rejected",
+  "On Hold",
+  "Pending Review",
+  "Awaiting Response",
+  "Under Evaluation",
+  "Budget Approval Pending"
+]);
 export const priorityEnum = pgEnum("priority", ["High", "Medium", "Low"]);
 export const sourceEnum = pgEnum("source", ["Referral", "Website", "Event", "Cold Outreach", "Partner", "Other"]);
 export const roleEnum = pgEnum("role", ["Sales Rep", "Manager", "Admin"]);
@@ -106,8 +125,28 @@ export const clientFormSchema = z.object({
   contactPerson: z.string().min(1, "Contact person is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
-  stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
-  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", "none"]),
+  stage: z.enum([
+    "Lead",
+    "Qualified",
+    "Meeting Scheduled",
+    "Demo Completed",
+    "Proof of Concept (POC)",
+    "Proposal Sent",
+    "Verbal Commitment",
+    "Contract Review",
+    "Won",
+    "Lost"
+  ]),
+  status: z.enum([
+    "In Negotiation",
+    "Proposal Rejected",
+    "On Hold",
+    "Pending Review",
+    "Awaiting Response",
+    "Under Evaluation",
+    "Budget Approval Pending",
+    "none"
+  ]),
   value: z.number().min(0, "Value must be positive"),
   priority: z.enum(["High", "Medium", "Low"]),
   responsiblePerson: z.string().min(1, "Responsible person is required"),
@@ -131,8 +170,28 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   winProbability: true,
 }).extend({
   value: z.number().min(0, "Value must be positive").transform(val => val.toString()),
-  stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
-  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", "none"]).transform(val => val === "none" ? null : val).nullable(),
+  stage: z.enum([
+    "Lead",
+    "Qualified",
+    "Meeting Scheduled",
+    "Demo Completed",
+    "Proof of Concept (POC)",
+    "Proposal Sent",
+    "Verbal Commitment",
+    "Contract Review",
+    "Won",
+    "Lost"
+  ]),
+  status: z.enum([
+    "In Negotiation",
+    "Proposal Rejected",
+    "On Hold",
+    "Pending Review",
+    "Awaiting Response",
+    "Under Evaluation",
+    "Budget Approval Pending",
+    "none"
+  ]).transform(val => val === "none" ? null : val).nullable(),
   priority: z.enum(["High", "Medium", "Low"]),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
@@ -152,6 +211,26 @@ export type Client = Omit<typeof clients.$inferSelect, 'value'> & {
   activityHistory?: Activity[];
 };
 
-export const stageOptions = ["Lead", "Qualified", "Proposal Sent", "Won"] as const;
-export const statusOptions = ["In Negotiation", "Proposal Rejected", "On Hold", "none"] as const;
+export const stageOptions = [
+  "Lead",
+  "Qualified",
+  "Meeting Scheduled",
+  "Demo Completed",
+  "Proof of Concept (POC)",
+  "Proposal Sent",
+  "Verbal Commitment",
+  "Contract Review",
+  "Won",
+  "Lost"
+] as const;
+export const statusOptions = [
+  "In Negotiation",
+  "Proposal Rejected",
+  "On Hold",
+  "Pending Review",
+  "Awaiting Response",
+  "Under Evaluation",
+  "Budget Approval Pending",
+  "none"
+] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;
