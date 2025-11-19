@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
+import crmBackgroundImage from "@assets/stock_images/professional_busines_fd35384c.jpg";
 
 interface ClientManagementPanelProps {
   client?: Client;
@@ -117,8 +118,15 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
 
   if (!client && mode === 'view') {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-muted/10">
-        <div className="text-center p-8 max-w-md">
+      <div className="flex flex-col items-center justify-center h-full relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${crmBackgroundImage})`,
+            opacity: 0.5
+          }}
+        />
+        <div className="relative z-10 text-center p-8 max-w-md bg-background/80 backdrop-blur-sm rounded-lg shadow-lg">
           <div className="mb-4 text-4xl">👋</div>
           <h3 className="text-lg font-semibold mb-2">Welcome to Client Management</h3>
           <p className="text-muted-foreground mb-6">
