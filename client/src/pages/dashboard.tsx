@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { MetricCard } from "@/components/metric-card";
 import { ClientListPanel } from "@/components/client-list-panel";
 import { ClientManagementPanel } from "@/components/client-management-panel";
+import { Navigation } from "@/components/navigation";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Users, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -130,6 +131,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      <Navigation />
       <div className="border-b bg-background">
         <div className="p-4 md:p-6">
           <div>
