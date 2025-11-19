@@ -26,6 +26,7 @@ export const clients = pgTable("clients", {
   priority: text("priority").notNull(),
   notes: text("notes").default(""),
   activityHistory: jsonb("activity_history").$type<Activity[]>().default([]),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
 export const clientFormSchema = z.object({
@@ -46,6 +47,7 @@ export type ClientFormData = z.infer<typeof clientFormSchema>;
 
 export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
+  createdAt: true,
 }).extend({
   value: z.number().min(0, "Value must be positive"),
   stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),

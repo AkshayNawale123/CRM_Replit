@@ -36,6 +36,7 @@ export class MemStorage implements IStorage {
           { id: "2", action: "Proposal sent", user: "Mike", date: "11/10/2025" },
           { id: "3", action: "Initial meeting", user: "Sarah", date: "11/5/2025" },
         ],
+        createdAt: new Date("2025-11-05"),
       },
       {
         companyName: "TechStart Inc",
@@ -53,6 +54,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Pricing discussion", user: "Tom", date: "11/16/2025" },
           { id: "2", action: "Proposal submitted", user: "Sarah", date: "11/10/2025" },
         ],
+        createdAt: new Date("2025-11-08"),
       },
       {
         companyName: "Global Solutions Ltd",
@@ -70,6 +72,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Contract signed", user: "Mike", date: "11/17/2025" },
           { id: "2", action: "Final negotiations", user: "Sarah", date: "11/12/2025" },
         ],
+        createdAt: new Date("2025-11-01"),
       },
       {
         companyName: "Innovation Hub",
@@ -86,6 +89,7 @@ export class MemStorage implements IStorage {
         activityHistory: [
           { id: "1", action: "Discovery call", user: "Tom", date: "11/14/2025" },
         ],
+        createdAt: new Date("2025-11-14"),
       },
       {
         companyName: "FutureTech Systems",
@@ -103,6 +107,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Technical review meeting", user: "Sarah", date: "11/18/2025" },
           { id: "2", action: "Proposal sent", user: "Mike", date: "11/15/2025" },
         ],
+        createdAt: new Date("2025-11-12"),
       },
     ];
 
@@ -130,6 +135,7 @@ export class MemStorage implements IStorage {
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
+      createdAt: new Date(),
     };
     this.clients.set(id, client);
     return client;
@@ -149,6 +155,7 @@ export class MemStorage implements IStorage {
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
+      createdAt: existing.createdAt,
     };
     this.clients.set(id, updated);
     return updated;
