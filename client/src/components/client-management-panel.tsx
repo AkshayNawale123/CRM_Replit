@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
-import crmBackgroundImage from "@assets/stock_images/professional_busines_fd35384c.jpg";
+import crmBackgroundImage from "@assets/Cybaem_Tech_CRM_1763559987158.png";
 
 interface ClientManagementPanelProps {
   client?: Client;
@@ -123,7 +123,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${crmBackgroundImage})`,
-            opacity: 0.5
+            opacity: 0.8
           }}
         />
         <div className="relative z-10 text-center p-8 max-w-md bg-background/80 backdrop-blur-sm rounded-lg shadow-lg">
