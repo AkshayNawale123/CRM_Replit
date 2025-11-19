@@ -157,11 +157,11 @@ export default function Glossary() {
 
         {/* Main Content */}
         <main className="flex-1 p-6 space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground" data-testid="heading-glossary">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground" data-testid="heading-glossary">
               CRM Glossary
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               Standard sales pipeline stages and definitions to help you manage client relationships effectively
             </p>
           </div>
