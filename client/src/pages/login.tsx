@@ -31,17 +31,19 @@ export default function Login({ onLogin }: LoginProps) {
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
           <div>
-            <img 
-              src={cybaemLogo} 
-              alt="Cybaem Tech" 
-              className="h-16 w-auto"
+            <img
+              src={cybaemLogo}
+              alt="Cybaem Tech"
+              className="h-32 w-auto mx-auto"
               data-testid="img-logo"
             />
           </div>
 
           {/* Title */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-foreground">Welcome back</h1>
+            <h1 className="text-3xl font-semibold text-foreground">
+              Welcome back
+            </h1>
             <p className="text-sm text-muted-foreground">
               Sign in to manage your client relationships
             </p>
@@ -52,7 +54,10 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="space-y-4">
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm text-muted-foreground">
+                <Label
+                  htmlFor="email"
+                  className="text-sm text-muted-foreground"
+                >
                   Email
                 </Label>
                 <Input
@@ -70,7 +75,10 @@ export default function Login({ onLogin }: LoginProps) {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm text-muted-foreground">
+                <Label
+                  htmlFor="password"
+                  className="text-sm text-muted-foreground"
+                >
                   Password
                 </Label>
                 <div className="relative">
@@ -89,7 +97,9 @@ export default function Login({ onLogin }: LoginProps) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     aria-pressed={showPassword}
                     data-testid="button-toggle-password"
                   >
@@ -152,11 +162,17 @@ export default function Login({ onLogin }: LoginProps) {
           <div className="flex items-center justify-between text-sm">
             <p className="text-muted-foreground">
               Don't have an account?{" "}
-              <button className="text-primary hover:underline font-medium" data-testid="link-signup">
+              <button
+                className="text-primary hover:underline font-medium"
+                data-testid="link-signup"
+              >
                 Sign up
               </button>
             </p>
-            <button className="text-muted-foreground hover:text-foreground" data-testid="link-terms">
+            <button
+              className="text-muted-foreground hover:text-foreground"
+              data-testid="link-terms"
+            >
               Terms & Conditions
             </button>
           </div>
@@ -189,7 +205,9 @@ export default function Login({ onLogin }: LoginProps) {
           {/* Floating Card - Task */}
           <Card className="absolute top-20 right-20 p-4 bg-white/90 backdrop-blur-sm shadow-xl max-w-xs">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Pipeline Progress</span>
+              <span className="text-sm font-medium text-foreground">
+                Pipeline Progress
+              </span>
               <span className="text-xs text-muted-foreground">Q4 2024</span>
             </div>
             <div className="flex items-center gap-2">
@@ -206,7 +224,8 @@ export default function Login({ onLogin }: LoginProps) {
               Manage Your Client Relationships
             </h2>
             <p className="text-xl text-white/90 drop-shadow">
-              Track deals, monitor pipeline stages, and close more deals with powerful CRM tools
+              Track deals, monitor pipeline stages, and close more deals with
+              powerful CRM tools
             </p>
           </div>
 
@@ -219,7 +238,9 @@ export default function Login({ onLogin }: LoginProps) {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">New Leads</p>
-                  <p className="text-sm font-semibold text-foreground">This Week</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    This Week
+                  </p>
                 </div>
               </div>
             </div>
