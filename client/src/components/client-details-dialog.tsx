@@ -24,10 +24,9 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  if (!client) return null;
-
   const addActivityMutation = useMutation({
     mutationFn: async (activity: { action: string; user: string }) => {
+      if (!client) throw new Error("No client selected");
       const response = await fetch(`/api/clients/${client.id}/activities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,6 +55,7 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
 
   const deleteActivityMutation = useMutation({
     mutationFn: async (activityId: string) => {
+      if (!client) throw new Error("No client selected");
       const response = await fetch(`/api/clients/${client.id}/activities/${activityId}`, {
         method: "DELETE",
       });
@@ -98,6 +98,8 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
     const dateObj = typeof date === "string" ? new Date(date) : date;
     return format(dateObj, "MM/dd/yyyy");
   };
+
+  if (!client) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
