@@ -116,7 +116,7 @@ export default function Dashboard() {
         <div className="p-4 md:p-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-              CRM Dashboard
+              Client Portfolio
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
               Manage all client relationships and deal pipeline
