@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { insertClientSchema, type InsertClient, type Client, stageOptions, statusOptions, priorityOptions } from "@shared/schema";
+import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, statusOptions, priorityOptions } from "@shared/schema";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -24,17 +25,20 @@ interface ClientDialogProps {
 export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, isLoading }: ClientDialogProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  const form = useForm<InsertClient>({
-    resolver: zodResolver(insertClientSchema),
+  const form = useForm<ClientFormData>({
+    resolver: zodResolver(clientFormSchema),
     defaultValues: {
       companyName: "",
       contactPerson: "",
+      email: "",
+      phone: "",
       stage: "Lead" as const,
       status: "" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
       nextFollowUp: format(new Date(), "yyyy-MM-dd"),
       priority: "Medium" as const,
+      notes: "",
     },
   });
 
@@ -43,29 +47,39 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       form.reset({
         companyName: client.companyName,
         contactPerson: client.contactPerson,
-        stage: client.stage,
-        status: client.status || "",
+        email: client.email,
+        phone: client.phone,
+        stage: client.stage as ClientFormData["stage"],
+        status: (client.status || "") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
         nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
-        priority: client.priority,
+        priority: client.priority as ClientFormData["priority"],
+        notes: client.notes || "",
       });
     } else if (open && !client) {
       form.reset({
         companyName: "",
         contactPerson: "",
+        email: "",
+        phone: "",
         stage: "Lead",
         status: "",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
         nextFollowUp: format(new Date(), "yyyy-MM-dd"),
         priority: "Medium",
+        notes: "",
       });
     }
   }, [open, client]);
 
-  const handleSubmit = (data: InsertClient) => {
-    onSubmit(data);
+  const handleSubmit = (data: ClientFormData) => {
+    onSubmit({
+      ...data,
+      status: data.status || null,
+      activityHistory: client?.activityHistory || [],
+    });
   };
 
   const handleDelete = () => {
@@ -120,6 +134,46 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                           placeholder="John Smith" 
                           {...field} 
                           data-testid="input-contact-person"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email"
+                          placeholder="john@acme.com" 
+                          {...field} 
+                          data-testid="input-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="tel"
+                          placeholder="+1 234-567-8900" 
+                          {...field} 
+                          data-testid="input-phone"
                         />
                       </FormControl>
                       <FormMessage />
@@ -265,6 +319,25 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add notes about this client..."
+                        rows={4}
+                        {...field}
+                        data-testid="input-notes"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <DialogFooter className="gap-2">
                 {client && onDelete && (

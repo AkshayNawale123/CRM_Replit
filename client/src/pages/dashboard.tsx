@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/metric-card";
 import { ClientTable } from "@/components/client-table";
 import { ClientDialog } from "@/components/client-dialog";
+import { ClientDetailsDialog } from "@/components/client-details-dialog";
 import { Users, CheckCircle, Clock, XCircle, DollarSign, Plus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 
 export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
@@ -109,6 +111,16 @@ export default function Dashboard() {
     if (selectedClient) {
       deleteMutation.mutate(selectedClient.id);
     }
+  };
+
+  const handleViewDetails = (client: Client) => {
+    setSelectedClient(client);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleEditFromDetails = () => {
+    setDetailsDialogOpen(false);
+    setDialogOpen(true);
   };
 
   const handleEditClient = (client: Client) => {
@@ -260,10 +272,17 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           ) : (
-            <ClientTable clients={filteredClients} onEditClient={handleEditClient} />
+            <ClientTable clients={filteredClients} onEditClient={handleViewDetails} />
           )}
         </div>
       </div>
+
+      <ClientDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onEdit={selectedClient ? handleEditFromDetails : undefined}
+        client={selectedClient || null}
+      />
 
       <ClientDialog
         open={dialogOpen}
