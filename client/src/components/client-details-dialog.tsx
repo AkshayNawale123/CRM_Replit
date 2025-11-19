@@ -119,17 +119,21 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-green-500" />
-              <h3 className="text-lg font-semibold">Follow-up Management</h3>
+              <h3 className="text-lg font-semibold">Account Management</h3>
             </div>
             <div className="bg-muted/10 rounded-lg p-4">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Last Follow-up</div>
                   <div className="text-lg font-semibold">{formatDate(client.lastFollowUp)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Next Follow-up</div>
-                  <div className="text-lg font-semibold">{formatDate(client.nextFollowUp)}</div>
+                  <div className="text-sm text-muted-foreground mb-1">Responsible Person</div>
+                  <div className="text-lg font-semibold">{client.responsiblePerson}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Country</div>
+                  <div className="text-lg font-semibold">{client.country}</div>
                 </div>
               </div>
             </div>

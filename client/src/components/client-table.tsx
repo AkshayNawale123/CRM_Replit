@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
-import { ChevronRight, AlertTriangle } from "lucide-react";
-import { format, isPast, startOfDay, differenceInDays } from "date-fns";
+import { ChevronRight } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
 
 interface ClientTableProps {
@@ -27,11 +27,6 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
     return format(dateObj, "MM/dd/yyyy");
   };
 
-  const isOverdue = (date: Date | string) => {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return isPast(startOfDay(dateObj)) && startOfDay(dateObj).getTime() !== startOfDay(new Date()).getTime();
-  };
-
   const getDaysInPipeline = (createdAt: Date | string) => {
     const createdDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
     const today = new Date();
@@ -50,7 +45,8 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
               <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold text-right">Value</TableHead>
               <TableHead className="font-semibold">Last Follow-up</TableHead>
-              <TableHead className="font-semibold">Next Follow-up</TableHead>
+              <TableHead className="font-semibold">Responsible Person</TableHead>
+              <TableHead className="font-semibold">Country</TableHead>
               <TableHead className="font-semibold">Priority</TableHead>
               <TableHead className="font-semibold text-center">Days in Pipeline</TableHead>
               <TableHead className="font-semibold text-right">Actions</TableHead>
@@ -59,14 +55,12 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
                   No clients found. Add your first client to get started.
                 </TableCell>
               </TableRow>
             ) : (
               clients.map((client) => {
-                const nextFollowUpOverdue = isOverdue(client.nextFollowUp);
-                
                 return (
                   <TableRow 
                     key={client.id} 
@@ -95,21 +89,11 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
                     <TableCell className="text-muted-foreground" data-testid={`text-last-followup-${client.id}`}>
                       {formatDate(client.lastFollowUp)}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {nextFollowUpOverdue && (
-                          <AlertTriangle className="h-4 w-4 text-red-600" data-testid={`icon-overdue-${client.id}`} />
-                        )}
-                        <span 
-                          className={nextFollowUpOverdue ? "font-semibold text-red-600" : "text-muted-foreground"}
-                          data-testid={`text-next-followup-${client.id}`}
-                        >
-                          {formatDate(client.nextFollowUp)}
-                          {nextFollowUpOverdue && (
-                            <span className="ml-1 text-xs uppercase font-semibold">OVERDUE</span>
-                          )}
-                        </span>
-                      </div>
+                    <TableCell className="text-muted-foreground" data-testid={`text-responsible-${client.id}`}>
+                      {client.responsiblePerson}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground" data-testid={`text-country-${client.id}`}>
+                      {client.country}
                     </TableCell>
                     <TableCell>
                       <PriorityBadge priority={client.priority as any} />

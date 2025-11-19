@@ -36,8 +36,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       status: "" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
-      nextFollowUp: format(new Date(), "yyyy-MM-dd"),
       priority: "Medium" as const,
+      responsiblePerson: "",
+      country: "",
       notes: "",
     },
   });
@@ -53,8 +54,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         status: (client.status || "") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
-        nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
         priority: client.priority as ClientFormData["priority"],
+        responsiblePerson: client.responsiblePerson,
+        country: client.country,
         notes: client.notes || "",
       });
     } else if (open && !client) {
@@ -67,8 +69,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         status: "",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
-        nextFollowUp: format(new Date(), "yyyy-MM-dd"),
         priority: "Medium",
+        responsiblePerson: "",
+        country: "",
         notes: "",
       });
     }
@@ -283,16 +286,15 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="lastFollowUp"
+                  name="responsiblePerson"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Follow-up</FormLabel>
+                      <FormLabel>Responsible Person</FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          placeholder="Sarah Johnson" 
                           {...field} 
-                          value={typeof field.value === 'string' ? field.value : ''}
-                          data-testid="input-last-followup"
+                          data-testid="input-responsible-person"
                         />
                       </FormControl>
                       <FormMessage />
@@ -302,16 +304,15 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
 
                 <FormField
                   control={form.control}
-                  name="nextFollowUp"
+                  name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Next Follow-up</FormLabel>
+                      <FormLabel>Country</FormLabel>
                       <FormControl>
                         <Input 
-                          type="date" 
+                          placeholder="United States" 
                           {...field} 
-                          value={typeof field.value === 'string' ? field.value : ''}
-                          data-testid="input-next-followup"
+                          data-testid="input-country"
                         />
                       </FormControl>
                       <FormMessage />
@@ -319,6 +320,25 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="lastFollowUp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Follow-up</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="date" 
+                        {...field} 
+                        value={typeof field.value === 'string' ? field.value : ''}
+                        data-testid="input-last-followup"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

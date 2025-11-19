@@ -22,8 +22,9 @@ export const clients = pgTable("clients", {
   status: text("status"),
   value: integer("value").notNull(),
   lastFollowUp: timestamp("last_follow_up").notNull(),
-  nextFollowUp: timestamp("next_follow_up").notNull(),
   priority: text("priority").notNull(),
+  responsiblePerson: text("responsible_person").notNull(),
+  country: text("country").notNull(),
   notes: text("notes").default(""),
   activityHistory: jsonb("activity_history").$type<Activity[]>().default([]),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
@@ -38,9 +39,10 @@ export const clientFormSchema = z.object({
   status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", ""]),
   value: z.number().min(0, "Value must be positive"),
   priority: z.enum(["High", "Medium", "Low"]),
+  responsiblePerson: z.string().min(1, "Responsible person is required"),
+  country: z.string().min(1, "Country is required"),
   notes: z.string().default(""),
   lastFollowUp: z.string().min(1, "Last follow-up date is required"),
-  nextFollowUp: z.string().min(1, "Next follow-up date is required"),
 });
 
 export type ClientFormData = z.infer<typeof clientFormSchema>;
@@ -55,10 +57,11 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   priority: z.enum(["High", "Medium", "Low"]),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
+  responsiblePerson: z.string().min(1, "Responsible person is required"),
+  country: z.string().min(1, "Country is required"),
   notes: z.string().optional().default(""),
   activityHistory: z.array(activitySchema).optional().default([]),
   lastFollowUp: z.string().min(1, "Last follow-up date is required").transform(val => new Date(val)),
-  nextFollowUp: z.string().min(1, "Next follow-up date is required").transform(val => new Date(val)),
 });
 
 export type InsertClient = z.infer<typeof insertClientSchema>;

@@ -28,8 +28,9 @@ export class MemStorage implements IStorage {
         status: "In Negotiation",
         value: 250000,
         lastFollowUp: new Date("2025-11-15"),
-        nextFollowUp: new Date("2025-11-20"),
         priority: "High",
+        responsiblePerson: "Sarah Johnson",
+        country: "United States",
         notes: "Interested in enterprise package. Decision maker meeting scheduled.",
         activityHistory: [
           { id: "1", action: "Follow-up call completed", user: "Sarah", date: "11/15/2025" },
@@ -47,8 +48,9 @@ export class MemStorage implements IStorage {
         status: "Proposal Rejected",
         value: 180000,
         lastFollowUp: new Date("2025-11-16"),
-        nextFollowUp: new Date("2025-11-22"),
         priority: "Medium",
+        responsiblePerson: "Tom Williams",
+        country: "Canada",
         notes: "Looking for more flexible pricing options.",
         activityHistory: [
           { id: "1", action: "Pricing discussion", user: "Tom", date: "11/16/2025" },
@@ -65,8 +67,9 @@ export class MemStorage implements IStorage {
         status: "On Hold",
         value: 420000,
         lastFollowUp: new Date("2025-11-17"),
-        nextFollowUp: new Date("2025-11-25"),
         priority: "High",
+        responsiblePerson: "Mike Davis",
+        country: "United Kingdom",
         notes: "Contract signed. Awaiting project kick-off.",
         activityHistory: [
           { id: "1", action: "Contract signed", user: "Mike", date: "11/17/2025" },
@@ -83,8 +86,9 @@ export class MemStorage implements IStorage {
         status: "",
         value: 95000,
         lastFollowUp: new Date("2025-11-14"),
-        nextFollowUp: new Date("2025-11-19"),
         priority: "Low",
+        responsiblePerson: "Tom Williams",
+        country: "Australia",
         notes: "Initial contact made. Needs more information.",
         activityHistory: [
           { id: "1", action: "Discovery call", user: "Tom", date: "11/14/2025" },
@@ -100,8 +104,9 @@ export class MemStorage implements IStorage {
         status: "In Negotiation",
         value: 320000,
         lastFollowUp: new Date("2025-11-18"),
-        nextFollowUp: new Date("2025-11-21"),
         priority: "High",
+        responsiblePerson: "Sarah Johnson",
+        country: "Singapore",
         notes: "Strong interest. Reviewing technical requirements.",
         activityHistory: [
           { id: "1", action: "Technical review meeting", user: "Sarah", date: "11/18/2025" },
@@ -134,7 +139,6 @@ export class MemStorage implements IStorage {
       notes: insertClient.notes || "",
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
-      nextFollowUp: insertClient.nextFollowUp as Date,
       createdAt: new Date(),
     };
     this.clients.set(id, client);
@@ -154,7 +158,6 @@ export class MemStorage implements IStorage {
       notes: insertClient.notes || "",
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
-      nextFollowUp: insertClient.nextFollowUp as Date,
       createdAt: existing.createdAt,
     };
     this.clients.set(id, updated);
