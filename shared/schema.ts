@@ -36,7 +36,7 @@ export const clientFormSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
   stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
-  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", ""]),
+  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", "none"]),
   value: z.number().min(0, "Value must be positive"),
   priority: z.enum(["High", "Medium", "Low"]),
   responsiblePerson: z.string().min(1, "Responsible person is required"),
@@ -53,7 +53,7 @@ export const insertClientSchema = createInsertSchema(clients).omit({
 }).extend({
   value: z.number().min(0, "Value must be positive"),
   stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
-  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", ""]).transform(val => val || null).nullable(),
+  status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", "none"]).transform(val => val === "none" ? null : val).nullable(),
   priority: z.enum(["High", "Medium", "Low"]),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
@@ -68,5 +68,5 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Client = typeof clients.$inferSelect;
 
 export const stageOptions = ["Lead", "Qualified", "Proposal Sent", "Won"] as const;
-export const statusOptions = ["In Negotiation", "Proposal Rejected", "On Hold", ""] as const;
+export const statusOptions = ["In Negotiation", "Proposal Rejected", "On Hold", "none"] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;

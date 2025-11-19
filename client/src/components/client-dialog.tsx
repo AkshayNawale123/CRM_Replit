@@ -33,7 +33,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       email: "",
       phone: "",
       stage: "Lead" as const,
-      status: "" as const,
+      status: "none" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
       priority: "Medium" as const,
@@ -51,7 +51,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         email: client.email,
         phone: client.phone,
         stage: client.stage as ClientFormData["stage"],
-        status: (client.status || "") as ClientFormData["status"],
+        status: (client.status || "none") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
         priority: client.priority as ClientFormData["priority"],
@@ -66,7 +66,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         email: "",
         phone: "",
         stage: "Lead",
-        status: "",
+        status: "none",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
         priority: "Medium",
@@ -80,7 +80,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
   const handleSubmit = (data: ClientFormData) => {
     onSubmit({
       ...data,
-      status: data.status || null,
+      status: data.status === "none" ? null : data.status,
       activityHistory: client?.activityHistory || [],
     } as unknown as InsertClient);
   };
@@ -224,10 +224,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="" data-testid="option-status-none">None</SelectItem>
-                          {statusOptions.filter(s => s !== "").map((status) => (
-                            <SelectItem key={status} value={status} data-testid={`option-status-${status.toLowerCase().replace(/\s+/g, '-')}`}>
-                              {status}
+                          {statusOptions.map((status) => (
+                            <SelectItem key={status || 'none'} value={status || 'none'} data-testid={`option-status-${status ? status.toLowerCase().replace(/\s+/g, '-') : 'none'}`}>
+                              {status || 'None'}
                             </SelectItem>
                           ))}
                         </SelectContent>

@@ -38,7 +38,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
       email: "",
       phone: "",
       stage: "Lead" as const,
-      status: "" as const,
+      status: "none" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
       priority: "Medium" as const,
@@ -56,7 +56,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         email: client.email,
         phone: client.phone,
         stage: client.stage as ClientFormData["stage"],
-        status: (client.status || "") as ClientFormData["status"],
+        status: (client.status || "none") as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
         priority: client.priority as ClientFormData["priority"],
@@ -71,7 +71,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         email: "",
         phone: "",
         stage: "Lead",
-        status: "",
+        status: "none",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
         priority: "Medium",
@@ -85,7 +85,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
   const handleSubmit = (data: ClientFormData) => {
     onSubmit({
       ...data,
-      status: data.status || null,
+      status: data.status === "none" ? null : data.status,
       activityHistory: client?.activityHistory || [],
     } as unknown as InsertClient);
   };
@@ -379,10 +379,9 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
-                            {statusOptions.filter(s => s !== "").map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {status}
+                            {statusOptions.map((status) => (
+                              <SelectItem key={status || 'none'} value={status || 'none'}>
+                                {status || 'None'}
                               </SelectItem>
                             ))}
                           </SelectContent>
