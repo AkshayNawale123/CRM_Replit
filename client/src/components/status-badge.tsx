@@ -1,7 +1,16 @@
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, AlertCircle, Clock } from "lucide-react";
+import { TrendingUp, AlertCircle, Clock, Search, FileText, BarChart, DollarSign } from "lucide-react";
 
-type Status = "In Negotiation" | "Proposal Rejected" | "On Hold" | "" | null;
+type Status = 
+  | "In Negotiation"
+  | "Proposal Rejected"
+  | "On Hold"
+  | "Pending Review"
+  | "Awaiting Response"
+  | "Under Evaluation"
+  | "Budget Approval Pending"
+  | ""
+  | null;
 
 interface StatusBadgeProps {
   status: Status;
@@ -29,6 +38,30 @@ export function StatusBadge({ status }: StatusBadgeProps) {
           icon: Clock,
           bgColor: "bg-orange-100 text-orange-800",
           darkBgColor: "dark:bg-orange-950 dark:text-orange-200",
+        };
+      case "Pending Review":
+        return {
+          icon: FileText,
+          bgColor: "bg-blue-100 text-blue-800",
+          darkBgColor: "dark:bg-blue-950 dark:text-blue-200",
+        };
+      case "Awaiting Response":
+        return {
+          icon: Clock,
+          bgColor: "bg-cyan-100 text-cyan-800",
+          darkBgColor: "dark:bg-cyan-950 dark:text-cyan-200",
+        };
+      case "Under Evaluation":
+        return {
+          icon: Search,
+          bgColor: "bg-purple-100 text-purple-800",
+          darkBgColor: "dark:bg-purple-950 dark:text-purple-200",
+        };
+      case "Budget Approval Pending":
+        return {
+          icon: DollarSign,
+          bgColor: "bg-green-100 text-green-800",
+          darkBgColor: "dark:bg-green-950 dark:text-green-200",
         };
       default:
         return {
