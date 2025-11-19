@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
 import { SiApple, SiGoogle } from "react-icons/si";
+import cybaemLogo from "@assets/LOGO Cybaem tech Final_transparent_1763575779699.png";
 
 interface LoginProps {
   onLogin: () => void;
@@ -29,11 +30,13 @@ export default function Login({ onLogin }: LoginProps) {
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-primary">
-              <span className="text-lg font-bold text-primary">CT</span>
-            </div>
-            <span className="text-xl font-semibold text-foreground">Cybaem Tech</span>
+          <div>
+            <img 
+              src={cybaemLogo} 
+              alt="Cybaem Tech" 
+              className="h-16 w-auto"
+              data-testid="img-logo"
+            />
           </div>
 
           {/* Title */}
