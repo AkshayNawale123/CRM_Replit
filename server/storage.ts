@@ -1,7 +1,7 @@
-import { type Client, type InsertClient, clients } from "@shared/schema";
+import { type Client, type InsertClient, clients, users, activities } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-serverless";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import ws from "ws";
 
 export interface IStorage {
@@ -27,28 +27,132 @@ export class DbStorage implements IStorage {
     });
   }
 
+  private async enrichClientWithRelations(client: any): Promise<Client> {
+    // Get responsible person name
+    let responsiblePerson = "";
+    if (client.responsiblePersonId) {
+      const userResult = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.id, client.responsiblePersonId));
+      responsiblePerson = userResult[0]?.name || "";
+    }
+
+    // Get activities
+    const activitiesResult = await this.db
+      .select()
+      .from(activities)
+      .where(eq(activities.clientId, client.id))
+      .orderBy(sql`${activities.createdAt} DESC`);
+
+    const activityHistory = await Promise.all(
+      activitiesResult.map(async (act) => {
+        let userName = "";
+        if (act.userId) {
+          const userResult = await this.db
+            .select()
+            .from(users)
+            .where(eq(users.id, act.userId));
+          userName = userResult[0]?.name || "";
+        }
+        return {
+          id: act.id,
+          action: act.action,
+          user: userName,
+          date: new Date(act.createdAt).toISOString().split('T')[0],
+        };
+      })
+    );
+
+    return {
+      ...client,
+      value: parseFloat(client.value),
+      responsiblePerson,
+      activityHistory,
+    };
+  }
+
   async getAllClients(): Promise<Client[]> {
     const result = await this.db.select().from(clients);
-    return result;
+    return Promise.all(result.map(client => this.enrichClientWithRelations(client)));
   }
 
   async getClient(id: string): Promise<Client | undefined> {
     const result = await this.db.select().from(clients).where(eq(clients.id, id));
-    return result[0];
+    if (!result[0]) return undefined;
+    return this.enrichClientWithRelations(result[0]);
   }
 
   async createClient(insertClient: InsertClient): Promise<Client> {
-    const result = await this.db.insert(clients).values(insertClient).returning();
-    return result[0];
+    // Get or create user for responsible person
+    const responsiblePerson = (insertClient as any).responsiblePerson;
+    let userId: string | undefined;
+    
+    if (responsiblePerson) {
+      const existingUser = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.name, responsiblePerson));
+      
+      if (existingUser[0]) {
+        userId = existingUser[0].id;
+      } else {
+        const newUser = await this.db
+          .insert(users)
+          .values({ name: responsiblePerson })
+          .returning();
+        userId = newUser[0].id;
+      }
+    }
+
+    const clientData = {
+      ...insertClient,
+      responsiblePersonId: userId,
+    };
+
+    const result = await this.db.insert(clients).values(clientData).returning();
+    return this.enrichClientWithRelations(result[0]);
   }
 
   async updateClient(id: string, insertClient: InsertClient): Promise<Client | undefined> {
+    // Check if client exists
+    const existing = await this.db.select().from(clients).where(eq(clients.id, id));
+    if (!existing[0]) return undefined;
+
+    // Get or create user for responsible person
+    const responsiblePerson = (insertClient as any).responsiblePerson;
+    let userId: string | undefined;
+    
+    if (responsiblePerson) {
+      const existingUser = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.name, responsiblePerson));
+      
+      if (existingUser[0]) {
+        userId = existingUser[0].id;
+      } else {
+        const newUser = await this.db
+          .insert(users)
+          .values({ name: responsiblePerson })
+          .returning();
+        userId = newUser[0].id;
+      }
+    }
+
+    const clientData = {
+      ...insertClient,
+      responsiblePersonId: userId,
+      updatedAt: new Date(),
+    };
+
     const result = await this.db
       .update(clients)
-      .set(insertClient)
+      .set(clientData)
       .where(eq(clients.id, id))
       .returning();
-    return result[0];
+    
+    return this.enrichClientWithRelations(result[0]);
   }
 
   async deleteClient(id: string): Promise<boolean> {
@@ -57,42 +161,46 @@ export class DbStorage implements IStorage {
   }
 
   async addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined> {
-    const client = await this.getClient(clientId);
-    if (!client) {
-      return undefined;
+    const client = await this.db.select().from(clients).where(eq(clients.id, clientId));
+    if (!client[0]) return undefined;
+
+    // Get or create user for activity
+    let userId: string | undefined;
+    if (activity.user) {
+      const existingUser = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.name, activity.user));
+      
+      if (existingUser[0]) {
+        userId = existingUser[0].id;
+      } else {
+        const newUser = await this.db
+          .insert(users)
+          .values({ name: activity.user })
+          .returning();
+        userId = newUser[0].id;
+      }
     }
 
-    const newActivity = {
-      id: randomUUID(),
-      action: activity.action,
-      user: activity.user,
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    const updatedHistory = [newActivity, ...(client.activityHistory || [])];
-    const result = await this.db
-      .update(clients)
-      .set({ activityHistory: updatedHistory })
-      .where(eq(clients.id, clientId))
-      .returning();
+    await this.db
+      .insert(activities)
+      .values({
+        clientId,
+        action: activity.action,
+        userId,
+      });
     
-    return result[0];
+    return this.getClient(clientId);
   }
 
   async deleteActivity(clientId: string, activityId: string): Promise<Client | undefined> {
-    const client = await this.getClient(clientId);
-    if (!client) {
-      return undefined;
-    }
+    const client = await this.db.select().from(clients).where(eq(clients.id, clientId));
+    if (!client[0]) return undefined;
 
-    const updatedHistory = (client.activityHistory || []).filter(a => a.id !== activityId);
-    const result = await this.db
-      .update(clients)
-      .set({ activityHistory: updatedHistory })
-      .where(eq(clients.id, clientId))
-      .returning();
+    await this.db.delete(activities).where(eq(activities.id, activityId));
     
-    return result[0];
+    return this.getClient(clientId);
   }
 }
 
