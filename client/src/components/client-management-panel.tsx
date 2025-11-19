@@ -1,17 +1,56 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, statusOptions, priorityOptions } from "@shared/schema";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  clientFormSchema,
+  type ClientFormData,
+  type InsertClient,
+  type Client,
+  stageOptions,
+  statusOptions,
+  priorityOptions,
+} from "@shared/schema";
 import { format } from "date-fns";
-import { Trash2, Edit, X, Mail, Phone, Calendar, MapPin, User } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  Trash2,
+  Edit,
+  X,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  User,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
@@ -24,11 +63,19 @@ interface ClientManagementPanelProps {
   onDelete?: () => void;
   onCancel: () => void;
   isLoading?: boolean;
-  mode: 'view' | 'edit' | 'create';
-  onChangeMode: (mode: 'view' | 'edit' | 'create') => void;
+  mode: "view" | "edit" | "create";
+  onChangeMode: (mode: "view" | "edit" | "create") => void;
 }
 
-export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, isLoading, mode, onChangeMode }: ClientManagementPanelProps) {
+export function ClientManagementPanel({
+  client,
+  onSubmit,
+  onDelete,
+  onCancel,
+  isLoading,
+  mode,
+  onChangeMode,
+}: ClientManagementPanelProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const form = useForm<ClientFormData>({
@@ -42,7 +89,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
       status: "none" as const,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
-      nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
+      nextFollowUp: format(
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        "yyyy-MM-dd",
+      ),
       priority: "Medium" as const,
       responsiblePerson: "",
       country: "",
@@ -52,7 +102,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
   });
 
   useEffect(() => {
-    if (client && (mode === 'view' || mode === 'edit')) {
+    if (client && (mode === "view" || mode === "edit")) {
       form.reset({
         companyName: client.companyName,
         contactPerson: client.contactPerson,
@@ -69,7 +119,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
-    } else if (mode === 'create') {
+    } else if (mode === "create") {
       form.reset({
         companyName: "",
         contactPerson: "",
@@ -79,7 +129,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         status: "none",
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
-        nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
+        nextFollowUp: format(
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          "yyyy-MM-dd",
+        ),
         priority: "Medium",
         responsiblePerson: "",
         country: "",
@@ -116,23 +169,30 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
     return format(dateObj, "MM/dd/yyyy");
   };
 
-  if (!client && mode === 'view') {
+  if (!client && mode === "view") {
     return (
       <div className="flex flex-col items-center justify-center h-full relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${crmBackgroundImage})`,
-            opacity: 0.8
+            opacity: 0.9,
           }}
         />
         <div className="relative z-10 text-center p-8 max-w-md bg-background/80 backdrop-blur-sm rounded-lg shadow-lg">
           <div className="mb-4 text-4xl">👋</div>
-          <h3 className="text-lg font-semibold mb-2">Welcome to Client Management</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            Welcome to Client Management
+          </h3>
           <p className="text-muted-foreground mb-6">
-            Select a client from the list to view their details, or create a new client to get started.
+            Select a client from the list to view their details, or create a new
+            client to get started.
           </p>
-          <Button onClick={() => onChangeMode('create')} className="gap-2" data-testid="button-create-first-client">
+          <Button
+            onClick={() => onChangeMode("create")}
+            className="gap-2"
+            data-testid="button-create-first-client"
+          >
             <User className="h-4 w-4" />
             Create Your First Client
           </Button>
@@ -141,7 +201,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
     );
   }
 
-  if (mode === 'view' && client) {
+  if (mode === "view" && client) {
     return (
       <div className="flex flex-col h-full">
         <div className="p-6 border-b bg-background">
@@ -151,7 +211,12 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
               <p className="text-muted-foreground">{client.contactPerson}</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => onChangeMode('edit')} className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onChangeMode("edit")}
+                className="gap-2"
+              >
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>
@@ -181,7 +246,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <Mail className="h-3 w-3" />
                       Email
                     </div>
-                    <a href={`mailto:${client.email}`} className="text-sm font-medium text-blue-600 hover:underline">
+                    <a
+                      href={`mailto:${client.email}`}
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                    >
                       {client.email}
                     </a>
                   </div>
@@ -204,12 +272,21 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <User className="h-3 w-3" />
                       Responsible Person
                     </div>
-                    <div className="text-sm font-medium">{client.responsiblePerson}</div>
+                    <div className="text-sm font-medium">
+                      {client.responsiblePerson}
+                    </div>
                   </div>
                   {client.linkedin && (
                     <div className="col-span-2">
-                      <div className="text-sm text-muted-foreground mb-1">LinkedIn</div>
-                      <a href={client.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        LinkedIn
+                      </div>
+                      <a
+                        href={client.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-blue-600 hover:underline"
+                      >
                         {client.linkedin}
                       </a>
                     </div>
@@ -223,22 +300,30 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                 <h3 className="font-semibold mb-4">Deal Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Deal Value</div>
-                    <div className="text-2xl font-bold">{formatCurrency(client.value)}</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      Deal Value
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(client.value)}
+                    </div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
                       Last Follow-up
                     </div>
-                    <div className="text-lg font-semibold">{formatDate(client.lastFollowUp)}</div>
+                    <div className="text-lg font-semibold">
+                      {formatDate(client.lastFollowUp)}
+                    </div>
                   </div>
                   <div className="col-span-2">
                     <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
                       Next Follow-up
                     </div>
-                    <div className="text-lg font-semibold">{formatDate(client.nextFollowUp)}</div>
+                    <div className="text-lg font-semibold">
+                      {formatDate(client.nextFollowUp)}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -248,7 +333,9 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="font-semibold mb-2">Notes</h3>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.notes}</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {client.notes}
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -259,11 +346,18 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                   <h3 className="font-semibold mb-4">Activity History</h3>
                   <div className="space-y-3">
                     {client.activityHistory.map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                      <div
+                        key={activity.id}
+                        className="flex items-start gap-3 pb-3 border-b last:border-0"
+                      >
                         <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{activity.action}</div>
-                          <div className="text-xs text-muted-foreground">by {activity.user}</div>
+                          <div className="font-medium text-sm">
+                            {activity.action}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            by {activity.user}
+                          </div>
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap">
                           {activity.date}
@@ -297,7 +391,7 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         <div className="p-6 border-b bg-background">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
-              {mode === 'create' ? 'Add New Client' : 'Edit Client'}
+              {mode === "create" ? "Add New Client" : "Edit Client"}
             </h2>
             <Button variant="ghost" size="icon" onClick={onCancel}>
               <X className="h-4 w-4" />
@@ -308,7 +402,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
         <ScrollArea className="flex-1">
           <div className="p-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-6"
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -347,7 +444,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="john@acme.com" {...field} />
+                          <Input
+                            type="email"
+                            placeholder="john@acme.com"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -361,7 +462,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <FormItem>
                         <FormLabel>Phone</FormLabel>
                         <FormControl>
-                          <Input type="tel" placeholder="+1 234-567-8900" {...field} />
+                          <Input
+                            type="tel"
+                            placeholder="+1 234-567-8900"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -376,7 +481,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Stage</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select stage" />
@@ -401,7 +509,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -409,8 +520,11 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                           </FormControl>
                           <SelectContent>
                             {statusOptions.map((status) => (
-                              <SelectItem key={status || 'none'} value={status || 'none'}>
-                                {status || 'None'}
+                              <SelectItem
+                                key={status || "none"}
+                                value={status || "none"}
+                              >
+                                {status || "None"}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -426,7 +540,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select priority" />
@@ -457,7 +574,9 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                           type="number"
                           placeholder="250000"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -503,10 +622,12 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <FormItem>
                         <FormLabel>Last Follow-up</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            value={typeof field.value === 'string' ? field.value : ''}
+                          <Input
+                            type="date"
+                            {...field}
+                            value={
+                              typeof field.value === "string" ? field.value : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -521,10 +642,12 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                       <FormItem>
                         <FormLabel>Next Follow-up</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            value={typeof field.value === 'string' ? field.value : ''}
+                          <Input
+                            type="date"
+                            {...field}
+                            value={
+                              typeof field.value === "string" ? field.value : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -540,10 +663,10 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                     <FormItem>
                       <FormLabel>LinkedIn (Optional)</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="url"
-                          placeholder="https://www.linkedin.com/in/profile" 
-                          {...field} 
+                          placeholder="https://www.linkedin.com/in/profile"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -578,12 +701,12 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    {isLoading ? "Saving..." : mode === 'create' ? "Add Client" : "Save Changes"}
+                  <Button type="submit" disabled={isLoading} className="flex-1">
+                    {isLoading
+                      ? "Saving..."
+                      : mode === "create"
+                        ? "Add Client"
+                        : "Save Changes"}
                   </Button>
                 </div>
               </form>
@@ -597,12 +720,13 @@ export function ClientManagementPanel({ client, onSubmit, onDelete, onCancel, is
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Client</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this client? This action cannot be undone.
+              Are you sure you want to delete this client? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
