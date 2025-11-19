@@ -7,11 +7,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClientTable } from "@/components/client-table";
 import { ClientDetailsDialog } from "@/components/client-details-dialog";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function Reports() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: clients = [], isLoading, error } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
@@ -27,6 +39,54 @@ export default function Reports() {
   const inNegotiationCount = clients.filter((c) => c.status === "In Negotiation").length;
   const rejectedCount = clients.filter((c) => c.status === "Proposal Rejected").length;
   const totalPipeline = clients.reduce((sum, c) => sum + c.value, 0);
+
+  const totalPages = Math.ceil(totalClients / ITEMS_PER_PAGE);
+
+  const paginatedClients = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return clients.slice(startIndex, endIndex);
+  }, [clients, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    const maxVisiblePages = 7;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   const formatPipeline = (value: number) => {
     if (value >= 1000000) {
@@ -109,7 +169,7 @@ export default function Reports() {
           </div>
         )}
 
-        <div>
+        <div className="space-y-3">
           {isLoading ? (
             <Card>
               <CardContent className="p-4">
@@ -130,7 +190,58 @@ export default function Reports() {
               </CardContent>
             </Card>
           ) : (
-            <ClientTable clients={clients} onEditClient={handleViewDetails} />
+            <>
+              <ClientTable clients={paginatedClients} onEditClient={handleViewDetails} />
+              
+              {totalPages > 1 && (
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalClients)} of {totalClients} entries
+                      </p>
+                      
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              data-testid="button-pagination-previous"
+                            />
+                          </PaginationItem>
+                          
+                          {getPageNumbers().map((page, index) => (
+                            <PaginationItem key={index}>
+                              {page === 'ellipsis' ? (
+                                <PaginationEllipsis />
+                              ) : (
+                                <PaginationLink
+                                  onClick={() => handlePageChange(page)}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                  data-testid={`button-page-${page}`}
+                                >
+                                  {page}
+                                </PaginationLink>
+                              )}
+                            </PaginationItem>
+                          ))}
+                          
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              data-testid="button-pagination-next"
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </div>
