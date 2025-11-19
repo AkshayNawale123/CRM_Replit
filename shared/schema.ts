@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, numeric, timestamp, jsonb, pgEnum, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, numeric, timestamp, jsonb, pgEnum, uuid, index, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -8,16 +8,19 @@ import { relations } from "drizzle-orm";
 export const stageEnum = pgEnum("stage", ["Lead", "Qualified", "Proposal Sent", "Won"]);
 export const statusEnum = pgEnum("status", ["In Negotiation", "Proposal Rejected", "On Hold"]);
 export const priorityEnum = pgEnum("priority", ["High", "Medium", "Low"]);
+export const sourceEnum = pgEnum("source", ["Referral", "Website", "Event", "Cold Outreach", "Partner", "Other"]);
+export const roleEnum = pgEnum("role", ["Sales Rep", "Manager", "Admin"]);
 
 // Users table for responsible persons
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull().unique(),
   email: text("email"),
+  role: roleEnum("role").default("Sales Rep"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Improved clients table with better data types (preserving varchar ID for existing data)
+// Improved clients table with better data types and additional fields
 export const clients = pgTable("clients", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   companyName: text("company_name").notNull(),
@@ -34,9 +37,17 @@ export const clients = pgTable("clients", {
   country: text("country").notNull(),
   linkedin: text("linkedin").default(""),
   notes: text("notes").default(""),
+  source: sourceEnum("source").default("Other"),
+  industry: text("industry"),
+  estimatedCloseDate: timestamp("estimated_close_date", { withTimezone: true }),
+  winProbability: integer("win_probability"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  stageIdx: index("clients_stage_idx").on(table.stage),
+  priorityIdx: index("clients_priority_idx").on(table.priority),
+  responsiblePersonIdx: index("clients_responsible_person_idx").on(table.responsiblePersonId),
+}));
 
 // Normalized activities table
 export const activities = pgTable("activities", {
@@ -45,7 +56,9 @@ export const activities = pgTable("activities", {
   action: text("action").notNull(),
   userId: varchar("user_id").references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  clientIdx: index("activities_client_idx").on(table.clientId),
+}));
 
 // Relations
 export const clientsRelations = relations(clients, ({ one, many }) => ({
