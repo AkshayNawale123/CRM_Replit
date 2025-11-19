@@ -1,8 +1,78 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, numeric, timestamp, jsonb, pgEnum, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
+// PostgreSQL ENUMs for better type safety
+export const stageEnum = pgEnum("stage", ["Lead", "Qualified", "Proposal Sent", "Won"]);
+export const statusEnum = pgEnum("status", ["In Negotiation", "Proposal Rejected", "On Hold"]);
+export const priorityEnum = pgEnum("priority", ["High", "Medium", "Low"]);
+
+// Users table for responsible persons
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  email: text("email"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Improved clients table with better data types (preserving varchar ID for existing data)
+export const clients = pgTable("clients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull(),
+  contactPerson: text("contact_person").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  stage: stageEnum("stage").notNull(),
+  status: statusEnum("status"),
+  value: numeric("value", { precision: 10, scale: 2 }).notNull(),
+  lastFollowUp: timestamp("last_follow_up", { withTimezone: true }).notNull(),
+  nextFollowUp: timestamp("next_follow_up", { withTimezone: true }).notNull(),
+  priority: priorityEnum("priority").notNull(),
+  responsiblePersonId: varchar("responsible_person_id").references(() => users.id),
+  country: text("country").notNull(),
+  linkedin: text("linkedin").default(""),
+  notes: text("notes").default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Normalized activities table
+export const activities = pgTable("activities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clientId: varchar("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Relations
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+  responsiblePerson: one(users, {
+    fields: [clients.responsiblePersonId],
+    references: [users.id],
+  }),
+  activities: many(activities),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  clients: many(clients),
+  activities: many(activities),
+}));
+
+export const activitiesRelations = relations(activities, ({ one }) => ({
+  client: one(clients, {
+    fields: [activities.clientId],
+    references: [clients.id],
+  }),
+  user: one(users, {
+    fields: [activities.userId],
+    references: [users.id],
+  }),
+}));
+
+// Legacy activity schema for backward compatibility during migration
 export const activitySchema = z.object({
   id: z.string(),
   action: z.string(),
@@ -17,26 +87,6 @@ export const addActivitySchema = z.object({
 
 export type Activity = z.infer<typeof activitySchema>;
 export type AddActivity = z.infer<typeof addActivitySchema>;
-
-export const clients = pgTable("clients", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  companyName: text("company_name").notNull(),
-  contactPerson: text("contact_person").notNull(),
-  email: text("email").notNull(),
-  phone: text("phone").notNull(),
-  stage: text("stage").notNull(),
-  status: text("status"),
-  value: integer("value").notNull(),
-  lastFollowUp: timestamp("last_follow_up").notNull(),
-  nextFollowUp: timestamp("next_follow_up").notNull(),
-  priority: text("priority").notNull(),
-  responsiblePerson: text("responsible_person").notNull(),
-  country: text("country").notNull(),
-  linkedin: text("linkedin").default(""),
-  notes: text("notes").default(""),
-  activityHistory: jsonb("activity_history").$type<Activity[]>().default([]),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-});
 
 export const clientFormSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
@@ -60,8 +110,9 @@ export type ClientFormData = z.infer<typeof clientFormSchema>;
 export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 }).extend({
-  value: z.number().min(0, "Value must be positive"),
+  value: z.number().min(0, "Value must be positive").transform(val => val.toString()),
   stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
   status: z.enum(["In Negotiation", "Proposal Rejected", "On Hold", "none"]).transform(val => val === "none" ? null : val).nullable(),
   priority: z.enum(["High", "Medium", "Low"]),
@@ -71,13 +122,19 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   country: z.string().min(1, "Country is required"),
   linkedin: z.string().optional().default(""),
   notes: z.string().optional().default(""),
-  activityHistory: z.array(activitySchema).optional().default([]),
   lastFollowUp: z.string().min(1, "Last follow-up date is required").transform(val => new Date(val)),
   nextFollowUp: z.string().min(1, "Next follow-up date is required").transform(val => new Date(val)),
+  responsiblePersonId: z.string().optional(),
+}).transform((data) => {
+  const { responsiblePerson, ...rest } = data as any;
+  return rest;
 });
 
 export type InsertClient = z.infer<typeof insertClientSchema>;
-export type Client = typeof clients.$inferSelect;
+export type Client = typeof clients.$inferSelect & {
+  responsiblePerson?: string;
+  activityHistory?: Activity[];
+};
 
 export const stageOptions = ["Lead", "Qualified", "Proposal Sent", "Won"] as const;
 export const statusOptions = ["In Negotiation", "Proposal Rejected", "On Hold", "none"] as const;
