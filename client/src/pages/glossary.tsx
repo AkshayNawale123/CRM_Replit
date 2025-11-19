@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/navigation";
 import { useState, useEffect } from "react";
@@ -9,68 +15,81 @@ export default function Glossary() {
   const primaryStages = [
     {
       stage: "Lead",
-      description: "A potential customer who has shown initial interest but hasn't been qualified yet. This is the first touchpoint where basic information has been captured.",
-      badge: "lead"
+      description:
+        "A potential customer who has shown initial interest but hasn't been qualified yet. This is the first touchpoint where basic information has been captured.",
+      badge: "lead",
     },
     {
       stage: "Qualified",
-      description: "The lead has been vetted and meets your ideal customer profile (ICP) with confirmed budget, authority, need, and timeline (BANT criteria).",
-      badge: "qualified"
+      description:
+        "The lead has been vetted and meets your ideal customer profile (ICP) with confirmed budget, authority, need, and timeline (BANT criteria). In this context, vetted means the lead has been through a process of qualification to confirm they are a good potential customer, using the BANT framework.",
+      badge: "qualified",
     },
     {
       stage: "Meeting Scheduled",
-      description: "Initial discovery or demo meeting has been set up to understand the prospect's needs and present your solution.",
-      badge: "meeting"
+      description:
+        "Initial discovery or demo meeting has been set up to understand the prospect's needs and present your solution.",
+      badge: "meeting",
     },
     {
       stage: "Proposal Sent",
-      description: "A formal proposal or quote has been delivered to the prospect outlining the solution, pricing, and terms.",
-      badge: "proposal"
+      description:
+        "A formal proposal or quote has been delivered to the prospect outlining the solution, pricing, and terms.",
+      badge: "proposal",
     },
     {
       stage: "In Negotiation",
-      description: "Active discussions are happening around pricing, terms, contract details, or customizations to close the deal.",
-      badge: "negotiation"
+      description:
+        "Active discussions are happening around pricing, terms, contract details, or customizations to close the deal.",
+      badge: "negotiation",
     },
     {
       stage: "Verbal Commitment",
-      description: "The prospect has verbally agreed to move forward but formal contracts haven't been signed yet.",
-      badge: "verbal"
+      description:
+        "The prospect has verbally agreed to move forward but formal contracts haven't been signed yet.",
+      badge: "verbal",
     },
     {
       stage: "Won",
-      description: "The deal is closed successfully with signed contracts and payment terms agreed upon. The client is now active.",
-      badge: "won"
+      description:
+        "The deal is closed successfully with signed contracts and payment terms agreed upon. The client is now active.",
+      badge: "won",
     },
     {
       stage: "Lost",
-      description: "The deal didn't close - the prospect chose a competitor, had budget issues, or decided not to proceed.",
-      badge: "lost"
+      description:
+        "The deal didn't close - the prospect chose a competitor, had budget issues, or decided not to proceed.",
+      badge: "lost",
     },
     {
       stage: "On Hold",
-      description: "The opportunity is temporarily paused due to timing, budget cycles, or internal changes at the prospect's company.",
-      badge: "hold"
-    }
+      description:
+        "The opportunity is temporarily paused due to timing, budget cycles, or internal changes at the prospect's company.",
+      badge: "hold",
+    },
   ];
 
   const additionalStages = [
     {
       stage: "Demo Completed",
-      description: "The product demonstration has been successfully delivered and the prospect is evaluating the solution."
+      description:
+        "The product demonstration has been successfully delivered and the prospect is evaluating the solution.",
     },
     {
       stage: "Proof of Concept (POC)",
-      description: "A trial or pilot project is underway to validate the solution before full commitment."
+      description:
+        "A trial or pilot project is underway to validate the solution before full commitment.",
     },
     {
       stage: "Contract Review",
-      description: "Legal teams are reviewing and finalizing contract terms before signing."
+      description:
+        "Legal teams are reviewing and finalizing contract terms before signing.",
     },
     {
       stage: "Closed-Lost (Nurture)",
-      description: "The deal didn't close now, but the prospect remains in the pipeline for future opportunities."
-    }
+      description:
+        "The deal didn't close now, but the prospect remains in the pipeline for future opportunities.",
+    },
   ];
 
   const scrollToSection = (id: string) => {
@@ -82,7 +101,7 @@ export default function Glossary() {
       const offsetPosition = elementPosition + window.pageYOffset - offset;
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };
@@ -90,7 +109,7 @@ export default function Glossary() {
   const indexItems = [
     { id: "primary-stages", label: "Sales Pipeline Stages" },
     { id: "additional-stages", label: "Alternative & Additional Stages" },
-    { id: "bant-framework", label: "BANT Framework" }
+    { id: "bant-framework", label: "BANT Framework" },
   ];
 
   // Track visible sections with IntersectionObserver
@@ -108,12 +127,16 @@ export default function Glossary() {
           });
         },
         {
-          rootMargin: '-100px 0px -60% 0px',
-          threshold: 0
-        }
+          rootMargin: "-100px 0px -60% 0px",
+          threshold: 0,
+        },
       );
 
-      const sectionIds = ['primary-stages', 'additional-stages', 'bant-framework'];
+      const sectionIds = [
+        "primary-stages",
+        "additional-stages",
+        "bant-framework",
+      ];
       sectionIds.forEach((id) => {
         const element = document.getElementById(id);
         if (element && observer) {
@@ -137,15 +160,17 @@ export default function Glossary() {
         {/* Left-hand Index */}
         <aside className="hidden md:block w-64 flex-shrink-0 p-6 sticky top-0 h-screen overflow-y-auto">
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Table of Contents</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">
+              Table of Contents
+            </h3>
             {indexItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
                 className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
                   activeSection === item.id
-                    ? 'bg-primary text-primary-foreground font-medium'
-                    : 'text-muted-foreground hover-elevate'
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-muted-foreground hover-elevate"
                 }`}
                 data-testid={`index-${item.id}`}
               >
@@ -158,11 +183,15 @@ export default function Glossary() {
         {/* Main Content */}
         <main className="flex-1 p-6 space-y-6">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="heading-glossary">
+            <h1
+              className="text-2xl font-semibold text-foreground"
+              data-testid="heading-glossary"
+            >
               CRM Glossary
             </h1>
             <p className="text-muted-foreground mt-0.5 text-sm">
-              Standard sales pipeline stages and definitions to help you manage client relationships effectively
+              Standard sales pipeline stages and definitions to help you manage
+              client relationships effectively
             </p>
           </div>
 
@@ -170,23 +199,29 @@ export default function Glossary() {
             <CardHeader>
               <CardTitle className="text-xl">Sales Pipeline Stages</CardTitle>
               <CardDescription>
-                The primary stages that guide a prospect through your sales process from initial contact to close
+                The primary stages that guide a prospect through your sales
+                process from initial contact to close
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {primaryStages.map((item, index) => (
-                <div 
-                  key={item.badge} 
+                <div
+                  key={item.badge}
                   className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
                   data-testid={`stage-${item.badge}`}
                 >
                   <div className="flex-shrink-0 w-8 text-center">
-                    <Badge variant="outline" className="rounded-full h-8 w-8 flex items-center justify-center">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full h-8 w-8 flex items-center justify-center"
+                    >
                       {index + 1}
                     </Badge>
                   </div>
                   <div className="flex-1 space-y-1">
-                    <h3 className="font-semibold text-foreground">{item.stage}</h3>
+                    <h3 className="font-semibold text-foreground">
+                      {item.stage}
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {item.description}
                     </p>
@@ -198,25 +233,33 @@ export default function Glossary() {
 
           <Card id="additional-stages">
             <CardHeader>
-              <CardTitle className="text-xl">Alternative & Additional Stages</CardTitle>
+              <CardTitle className="text-xl">
+                Alternative & Additional Stages
+              </CardTitle>
               <CardDescription>
-                Optional stages that can be used depending on your business model and sales process
+                Optional stages that can be used depending on your business
+                model and sales process
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {additionalStages.map((item, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0"
                   data-testid={`additional-stage-${index}`}
                 >
                   <div className="flex-shrink-0 w-8 text-center">
-                    <Badge variant="secondary" className="rounded-full h-8 w-8 flex items-center justify-center">
+                    <Badge
+                      variant="secondary"
+                      className="rounded-full h-8 w-8 flex items-center justify-center"
+                    >
                       {index + 10}
                     </Badge>
                   </div>
                   <div className="flex-1 space-y-1">
-                    <h3 className="font-semibold text-foreground">{item.stage}</h3>
+                    <h3 className="font-semibold text-foreground">
+                      {item.stage}
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {item.description}
                     </p>
@@ -228,28 +271,47 @@ export default function Glossary() {
 
           <Card className="bg-muted/50" id="bant-framework">
             <CardHeader>
-              <CardTitle className="text-lg">Key Sales Qualification Framework</CardTitle>
+              <CardTitle className="text-lg">
+                Key Sales Qualification Framework
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">BANT Criteria</span> - Use this framework to qualify leads:
-                </p>
+                  <span className="font-semibold text-foreground">
+                    BANT Criteria
+                  </span>{" "}
+                  - This involves verifying they have a defined Budget, the
+                  Authority to make a purchase, a real Need for the product or
+                  service, and a clear Timeline for when they plan to buy.{" "}
+                  <br />
+                  <br />
+                  Use this framework to qualify leads: <br />
+                  <br />
+                </p>{" "}
                 <ul className="space-y-1.5 ml-4 text-sm text-muted-foreground">
                   <li className="flex gap-2">
-                    <span className="font-semibold text-foreground min-w-20">Budget:</span>
+                    <span className="font-semibold text-foreground min-w-20">
+                      Budget:
+                    </span>
                     <span>Does the prospect have allocated funds?</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="font-semibold text-foreground min-w-20">Authority:</span>
+                    <span className="font-semibold text-foreground min-w-20">
+                      Authority:
+                    </span>
                     <span>Are you speaking with decision-makers?</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="font-semibold text-foreground min-w-20">Need:</span>
+                    <span className="font-semibold text-foreground min-w-20">
+                      Need:
+                    </span>
                     <span>Does your solution address a real pain point?</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="font-semibold text-foreground min-w-20">Timeline:</span>
+                    <span className="font-semibold text-foreground min-w-20">
+                      Timeline:
+                    </span>
                     <span>When do they plan to make a decision?</span>
                   </li>
                 </ul>
