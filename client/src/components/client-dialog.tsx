@@ -82,7 +82,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       ...data,
       status: data.status || null,
       activityHistory: client?.activityHistory || [],
-    });
+    } as unknown as InsertClient);
   };
 
   const handleDelete = () => {

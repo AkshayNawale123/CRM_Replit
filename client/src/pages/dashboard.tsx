@@ -1,49 +1,30 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/metric-card";
-import { ClientTable } from "@/components/client-table";
-import { ClientDialog } from "@/components/client-dialog";
-import { ClientDetailsDialog } from "@/components/client-details-dialog";
-import { Users, CheckCircle, Clock, XCircle, DollarSign, Plus, Search } from "lucide-react";
+import { ClientListPanel } from "@/components/client-list-panel";
+import { ClientManagementPanel } from "@/components/client-management-panel";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Users, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Client, InsertClient } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 export default function Dashboard() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [panelMode, setPanelMode] = useState<'view' | 'edit' | 'create'>('view');
   const { toast } = useToast();
 
   const { data: clients = [], isLoading, error } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
 
-  const filteredClients = useMemo(() => {
-    if (!searchQuery.trim()) return clients;
-    
-    const query = searchQuery.toLowerCase();
-    return clients.filter(
-      (client) =>
-        client.companyName.toLowerCase().includes(query) ||
-        client.contactPerson.toLowerCase().includes(query) ||
-        client.stage.toLowerCase().includes(query) ||
-        (client.status && client.status.toLowerCase().includes(query)) ||
-        client.priority.toLowerCase().includes(query)
-    );
-  }, [clients, searchQuery]);
-
   const createMutation = useMutation({
     mutationFn: (data: InsertClient) => apiRequest("POST", "/api/clients", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      setDialogOpen(false);
-      setSelectedClient(undefined);
+      setPanelMode('view');
       toast({
         title: "Success",
         description: "Client added successfully",
@@ -63,8 +44,7 @@ export default function Dashboard() {
       apiRequest("PUT", `/api/clients/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      setDialogOpen(false);
-      setSelectedClient(undefined);
+      setPanelMode('view');
       toast({
         title: "Success",
         description: "Client updated successfully",
@@ -83,8 +63,8 @@ export default function Dashboard() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/clients/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      setDialogOpen(false);
       setSelectedClient(undefined);
+      setPanelMode('view');
       toast({
         title: "Success",
         description: "Client deleted successfully",
@@ -100,7 +80,7 @@ export default function Dashboard() {
   });
 
   const handleSubmit = (data: InsertClient) => {
-    if (selectedClient) {
+    if (selectedClient && panelMode === 'edit') {
       updateMutation.mutate({ id: selectedClient.id, data });
     } else {
       createMutation.mutate(data);
@@ -113,24 +93,21 @@ export default function Dashboard() {
     }
   };
 
-  const handleViewDetails = (client: Client) => {
+  const handleSelectClient = (client: Client) => {
     setSelectedClient(client);
-    setDetailsDialogOpen(true);
-  };
-
-  const handleEditFromDetails = () => {
-    setDetailsDialogOpen(false);
-    setDialogOpen(true);
-  };
-
-  const handleEditClient = (client: Client) => {
-    setSelectedClient(client);
-    setDialogOpen(true);
+    setPanelMode('view');
   };
 
   const handleAddClient = () => {
     setSelectedClient(undefined);
-    setDialogOpen(true);
+    setPanelMode('create');
+  };
+
+  const handleCancel = () => {
+    if (panelMode === 'create') {
+      setSelectedClient(undefined);
+    }
+    setPanelMode('view');
   };
 
   const isMetricsLoading = isLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
@@ -152,55 +129,42 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto p-6 md:p-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-semibold text-foreground" data-testid="text-page-title">
-                  Executive CRM Dashboard
-                </h1>
-                <p className="text-muted-foreground mt-1" data-testid="text-page-subtitle">
-                  High-level view of all client relationships and project stages
-                </p>
-              </div>
-              <Button
-                onClick={handleAddClient}
-                className="gap-2"
-                data-testid="button-add-client"
-              >
-                <Plus className="h-4 w-4" />
-                Add Client
-              </Button>
-            </div>
+    <div className="flex flex-col h-screen bg-background">
+      <div className="border-b bg-background">
+        <div className="p-4 md:p-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+              CRM Dashboard
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Manage all client relationships and deal pipeline
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
-
+      <div className="p-4 md:p-6 border-b">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[...Array(5)].map((_, i) => (
               <Card key={i}>
-                <CardContent className="p-6">
-                  <Skeleton className="h-5 w-5 mb-2" />
-                  <Skeleton className="h-10 w-20 mb-1" />
-                  <Skeleton className="h-4 w-24" />
+                <CardContent className="p-4">
+                  <Skeleton className="h-4 w-4 mb-2" />
+                  <Skeleton className="h-8 w-16 mb-1" />
+                  <Skeleton className="h-3 w-20" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : error ? (
           <Card>
-            <CardContent className="p-12 text-center">
-              <p className="text-destructive font-medium mb-2">Failed to load metrics</p>
-              <p className="text-sm text-muted-foreground">Unable to fetch client data</p>
+            <CardContent className="p-8 text-center">
+              <p className="text-destructive font-medium mb-1 text-sm">Failed to load metrics</p>
+              <p className="text-xs text-muted-foreground">Unable to fetch client data</p>
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-opacity ${isMetricsLoading ? 'opacity-50' : 'opacity-100'}`}>
+          <div className={`grid grid-cols-2 md:grid-cols-5 gap-3 transition-opacity ${isMetricsLoading ? 'opacity-50' : 'opacity-100'}`}>
             <MetricCard
               title="Total Clients"
               value={totalClients}
@@ -233,65 +197,50 @@ export default function Dashboard() {
             />
           </div>
         )}
+      </div>
 
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold text-foreground" data-testid="text-section-title">
-              All Clients
-            </h2>
-            <div className="relative w-full sm:w-auto sm:min-w-[300px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search clients..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search"
-              />
+      <div className="flex-1 overflow-hidden">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Skeleton className="h-8 w-32 mb-2 mx-auto" />
+              <Skeleton className="h-4 w-48" />
             </div>
           </div>
-
-          {isLoading ? (
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      <Skeleton className="h-12 flex-1" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ) : error ? (
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
             <Card>
               <CardContent className="p-12 text-center">
                 <p className="text-destructive font-medium mb-2">Failed to load clients</p>
                 <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
               </CardContent>
             </Card>
-          ) : (
-            <ClientTable clients={filteredClients} onEditClient={handleViewDetails} />
-          )}
-        </div>
+          </div>
+        ) : (
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
+              <ClientListPanel
+                clients={clients}
+                selectedClientId={selectedClient?.id}
+                onSelectClient={handleSelectClient}
+                onAddClient={handleAddClient}
+              />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={65} minSize={50}>
+              <ClientManagementPanel
+                client={selectedClient}
+                onSubmit={handleSubmit}
+                onDelete={selectedClient ? handleDelete : undefined}
+                onCancel={handleCancel}
+                isLoading={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
+                mode={panelMode}
+                onChangeMode={setPanelMode}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </div>
-
-      <ClientDetailsDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
-        onEdit={selectedClient ? handleEditFromDetails : undefined}
-        client={selectedClient || null}
-      />
-
-      <ClientDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSubmit={handleSubmit}
-        onDelete={selectedClient ? handleDelete : undefined}
-        client={selectedClient}
-        isLoading={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
-      />
     </div>
   );
 }
