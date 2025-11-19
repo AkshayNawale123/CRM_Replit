@@ -102,6 +102,7 @@ export function ClientManagementPanel({
   });
 
   useEffect(() => {
+    setShowDeleteDialog(false);
     if (client && (mode === "view" || mode === "edit")) {
       form.reset({
         companyName: client.companyName,
