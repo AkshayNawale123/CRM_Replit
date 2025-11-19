@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { MetricCard } from "@/components/metric-card";
 import { ClientListPanel } from "@/components/client-list-panel";
 import { ClientManagementPanel } from "@/components/client-management-panel";
 import { Navigation } from "@/components/navigation";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Users, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Client, InsertClient } from "@shared/schema";
@@ -111,24 +109,6 @@ export default function Dashboard() {
     setPanelMode('view');
   };
 
-  const isMetricsLoading = isLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
-  
-  const totalClients = clients.length;
-  const wonCount = clients.filter((c) => c.stage === "Won").length;
-  const inNegotiationCount = clients.filter((c) => c.status === "In Negotiation").length;
-  const rejectedCount = clients.filter((c) => c.status === "Proposal Rejected").length;
-  const totalPipeline = clients.reduce((sum, c) => sum + c.value, 0);
-
-  const formatPipeline = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(2)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value}`;
-  };
-
   return (
     <div className="flex flex-col h-screen bg-background">
       <Navigation />
@@ -143,62 +123,6 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="p-4 md:p-6 border-b">
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[...Array(5)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-4 w-4 mb-2" />
-                  <Skeleton className="h-8 w-16 mb-1" />
-                  <Skeleton className="h-3 w-20" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : error ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-destructive font-medium mb-1 text-sm">Failed to load metrics</p>
-              <p className="text-xs text-muted-foreground">Unable to fetch client data</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className={`grid grid-cols-2 md:grid-cols-5 gap-3 transition-opacity ${isMetricsLoading ? 'opacity-50' : 'opacity-100'}`}>
-            <MetricCard
-              title="Total Clients"
-              value={totalClients}
-              icon={Users}
-              variant="default"
-            />
-            <MetricCard
-              title="Won"
-              value={wonCount}
-              icon={CheckCircle}
-              variant="success"
-            />
-            <MetricCard
-              title="In Negotiation"
-              value={inNegotiationCount}
-              icon={Clock}
-              variant="warning"
-            />
-            <MetricCard
-              title="Rejected"
-              value={rejectedCount}
-              icon={XCircle}
-              variant="danger"
-            />
-            <MetricCard
-              title="Total Pipeline"
-              value={formatPipeline(totalPipeline)}
-              icon={DollarSign}
-              variant="info"
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex-1 overflow-hidden">
