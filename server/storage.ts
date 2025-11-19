@@ -28,41 +28,36 @@ export class DbStorage implements IStorage {
   }
 
   private async enrichClientWithRelations(client: any): Promise<Client> {
-    // Get responsible person name
+    // Get responsible person name with a single query
     let responsiblePerson = "";
     if (client.responsiblePersonId) {
       const userResult = await this.db
-        .select()
+        .select({ name: users.name })
         .from(users)
-        .where(eq(users.id, client.responsiblePersonId));
+        .where(eq(users.id, client.responsiblePersonId))
+        .limit(1);
       responsiblePerson = userResult[0]?.name || "";
     }
 
-    // Get activities
-    const activitiesResult = await this.db
-      .select()
+    // Get activities with user names in a single JOIN query
+    const activitiesWithUsers = await this.db
+      .select({
+        id: activities.id,
+        action: activities.action,
+        createdAt: activities.createdAt,
+        userName: users.name,
+      })
       .from(activities)
+      .leftJoin(users, eq(activities.userId, users.id))
       .where(eq(activities.clientId, client.id))
       .orderBy(sql`${activities.createdAt} DESC`);
 
-    const activityHistory = await Promise.all(
-      activitiesResult.map(async (act) => {
-        let userName = "";
-        if (act.userId) {
-          const userResult = await this.db
-            .select()
-            .from(users)
-            .where(eq(users.id, act.userId));
-          userName = userResult[0]?.name || "";
-        }
-        return {
-          id: act.id,
-          action: act.action,
-          user: userName,
-          date: new Date(act.createdAt).toISOString().split('T')[0],
-        };
-      })
-    );
+    const activityHistory = activitiesWithUsers.map((act) => ({
+      id: act.id,
+      action: act.action,
+      user: act.userName || "",
+      date: new Date(act.createdAt).toISOString().split('T')[0],
+    }));
 
     return {
       ...client,

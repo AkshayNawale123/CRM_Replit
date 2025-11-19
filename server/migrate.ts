@@ -55,8 +55,10 @@ async function migrate() {
     `);
     console.log("✓ Users table created");
     
-    // Step 3: Extract unique responsible persons from existing clients
-    console.log("\n[3/8] Migrating responsible persons to users table...");
+    // Step 3: Extract unique responsible persons and activity authors
+    console.log("\n[3/8] Migrating users (responsible persons and activity authors)...");
+    
+    // First, insert responsible persons
     await db.execute(sql`
       INSERT INTO users (name)
       SELECT DISTINCT responsible_person
@@ -64,8 +66,21 @@ async function migrate() {
       WHERE responsible_person IS NOT NULL
       ON CONFLICT (name) DO NOTHING;
     `);
+    
+    // Then, extract and insert unique activity authors from JSONB
+    await db.execute(sql`
+      INSERT INTO users (name)
+      SELECT DISTINCT jsonb_array_elements(activity_history)->>'user' as user_name
+      FROM clients
+      WHERE activity_history IS NOT NULL 
+        AND jsonb_array_length(activity_history) > 0
+        AND jsonb_array_elements(activity_history)->>'user' IS NOT NULL
+        AND jsonb_array_elements(activity_history)->>'user' != ''
+      ON CONFLICT (name) DO NOTHING;
+    `);
+    
     const usersResult = await db.execute(sql`SELECT COUNT(*) as count FROM users;`);
-    console.log(`✓ Migrated ${usersResult.rows[0]?.count || 0} unique users`);
+    console.log(`✓ Migrated ${usersResult.rows[0]?.count || 0} unique users (responsible persons + activity authors)`);
     
     // Step 4: Add new columns to clients table
     console.log("\n[4/8] Adding new columns to clients table...");
