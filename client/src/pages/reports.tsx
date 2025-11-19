@@ -42,40 +42,40 @@ export default function Reports() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto p-6 md:p-8">
+        <div className="mx-auto px-4 py-3">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-2xl font-semibold text-foreground">
               Client Reports
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-0.5 text-sm">
               High-level view of all client relationships and project stages
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
+      <div className="mx-auto px-4 py-3 space-y-3">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
             {[...Array(5)].map((_, i) => (
               <Card key={i}>
-                <CardContent className="p-6">
-                  <Skeleton className="h-5 w-5 mb-2" />
-                  <Skeleton className="h-10 w-20 mb-1" />
-                  <Skeleton className="h-4 w-24" />
+                <CardContent className="p-3">
+                  <Skeleton className="h-4 w-4 mb-1" />
+                  <Skeleton className="h-8 w-16 mb-0.5" />
+                  <Skeleton className="h-3 w-20" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : error ? (
           <Card>
-            <CardContent className="p-12 text-center">
-              <p className="text-destructive font-medium mb-2">Failed to load metrics</p>
+            <CardContent className="p-8 text-center">
+              <p className="text-destructive font-medium mb-1">Failed to load metrics</p>
               <p className="text-sm text-muted-foreground">Unable to fetch client data</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
             <MetricCard
               title="Total Clients"
               value={totalClients}
@@ -109,14 +109,14 @@ export default function Reports() {
           </div>
         )}
 
-        <div className="space-y-4">
+        <div>
           {isLoading ? (
             <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
+              <CardContent className="p-4">
+                <div className="space-y-2">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="flex items-center gap-4">
-                      <Skeleton className="h-12 flex-1" />
+                      <Skeleton className="h-10 flex-1" />
                     </div>
                   ))}
                 </div>
@@ -124,8 +124,8 @@ export default function Reports() {
             </Card>
           ) : error ? (
             <Card>
-              <CardContent className="p-12 text-center">
-                <p className="text-destructive font-medium mb-2">Failed to load clients</p>
+              <CardContent className="p-8 text-center">
+                <p className="text-destructive font-medium mb-1">Failed to load clients</p>
                 <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
               </CardContent>
             </Card>

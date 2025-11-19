@@ -41,14 +41,14 @@ export function MetricCard({ title, value, icon: Icon, variant = "default" }: Me
 
   return (
     <Card className="hover-elevate transition-all duration-200" data-testid={`card-metric-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-2">
-          <Icon className={`h-5 w-5 ${getIconColor()}`} data-testid={`icon-${title.toLowerCase().replace(/\s+/g, '-')}`} />
-          <div className="flex flex-col gap-1">
-            <p className={`text-4xl font-bold ${getValueColor()}`} data-testid={`text-value-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+      <CardContent className="p-3">
+        <div className="flex flex-col gap-1">
+          <Icon className={`h-4 w-4 ${getIconColor()}`} data-testid={`icon-${title.toLowerCase().replace(/\s+/g, '-')}`} />
+          <div className="flex flex-col gap-0.5">
+            <p className={`text-2xl font-bold ${getValueColor()}`} data-testid={`text-value-${title.toLowerCase().replace(/\s+/g, '-')}`}>
               {value}
             </p>
-            <p className="text-sm font-medium text-muted-foreground" data-testid={`text-label-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+            <p className="text-xs font-medium text-muted-foreground" data-testid={`text-label-${title.toLowerCase().replace(/\s+/g, '-')}`}>
               {title}
             </p>
           </div>
