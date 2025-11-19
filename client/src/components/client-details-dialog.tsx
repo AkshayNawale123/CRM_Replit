@@ -112,6 +112,19 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                   <div className="text-sm text-muted-foreground mb-1">Phone</div>
                   <div className="font-medium">{client.phone}</div>
                 </div>
+                {client.linkedin && (
+                  <div className="col-span-3">
+                    <div className="text-sm text-muted-foreground mb-1">LinkedIn</div>
+                    <a
+                      href={client.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:underline"
+                    >
+                      {client.linkedin}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -126,6 +139,10 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Last Follow-up</div>
                   <div className="text-lg font-semibold">{formatDate(client.lastFollowUp)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Next Follow-up</div>
+                  <div className="text-lg font-semibold">{formatDate(client.nextFollowUp)}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Responsible Person</div>
