@@ -509,8 +509,8 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Status</FormLabel>
                         <Select
-                          onValueChange={(value) => field.onChange(value === "" ? null : value)}
-                          value={field.value ?? ""}
+                          onValueChange={(value) => field.onChange(value === "__none__" ? null : value)}
+                          value={field.value ?? "__none__"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -521,7 +521,7 @@ export function ClientManagementPanel({
                             {statusOptions.map((status) => (
                               <SelectItem
                                 key={status ?? "none"}
-                                value={status ?? ""}
+                                value={status ?? "__none__"}
                               >
                                 {status ?? "None"}
                               </SelectItem>

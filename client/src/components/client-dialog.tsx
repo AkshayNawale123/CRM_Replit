@@ -223,8 +223,8 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                     <FormItem>
                       <FormLabel>Status</FormLabel>
                       <Select 
-                        onValueChange={(value) => field.onChange(value === "" ? null : value)} 
-                        value={field.value ?? ""}
+                        onValueChange={(value) => field.onChange(value === "__none__" ? null : value)} 
+                        value={field.value ?? "__none__"}
                       >
                         <FormControl>
                           <SelectTrigger data-testid="select-status">
@@ -235,7 +235,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                           {statusOptions.map((status) => (
                             <SelectItem 
                               key={status ?? 'none'} 
-                              value={status ?? ""} 
+                              value={status ?? "__none__"} 
                               data-testid={`option-status-${status ? status.toLowerCase().replace(/\s+/g, '-') : 'none'}`}
                             >
                               {status ?? 'None'}
