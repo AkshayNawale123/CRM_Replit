@@ -124,6 +124,11 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  responsiblePersonId: true,
+  source: true,
+  industry: true,
+  estimatedCloseDate: true,
+  winProbability: true,
 }).extend({
   value: z.number().min(0, "Value must be positive").transform(val => val.toString()),
   stage: z.enum(["Lead", "Qualified", "Proposal Sent", "Won"]),
@@ -137,10 +142,7 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   notes: z.string().optional().default(""),
   lastFollowUp: z.string().min(1, "Last follow-up date is required").transform(val => new Date(val)),
   nextFollowUp: z.string().min(1, "Next follow-up date is required").transform(val => new Date(val)),
-  responsiblePersonId: z.string().optional(),
-}).transform((data) => {
-  const { responsiblePerson, ...rest } = data as any;
-  return rest;
+  activityHistory: z.array(z.any()).optional(),
 });
 
 export type InsertClient = z.infer<typeof insertClientSchema>;
