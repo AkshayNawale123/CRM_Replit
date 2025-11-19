@@ -1,5 +1,8 @@
-import { type Client, type InsertClient } from "@shared/schema";
+import { type Client, type InsertClient, clients } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import { eq } from "drizzle-orm";
+import ws from "ws";
 
 export interface IStorage {
   getAllClients(): Promise<Client[]>;
@@ -9,6 +12,88 @@ export interface IStorage {
   deleteClient(id: string): Promise<boolean>;
   addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined>;
   deleteActivity(clientId: string, activityId: string): Promise<Client | undefined>;
+}
+
+export class DbStorage implements IStorage {
+  private db;
+
+  constructor() {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is required");
+    }
+    this.db = drizzle({
+      connection: process.env.DATABASE_URL,
+      ws: ws,
+    });
+  }
+
+  async getAllClients(): Promise<Client[]> {
+    const result = await this.db.select().from(clients);
+    return result;
+  }
+
+  async getClient(id: string): Promise<Client | undefined> {
+    const result = await this.db.select().from(clients).where(eq(clients.id, id));
+    return result[0];
+  }
+
+  async createClient(insertClient: InsertClient): Promise<Client> {
+    const result = await this.db.insert(clients).values(insertClient).returning();
+    return result[0];
+  }
+
+  async updateClient(id: string, insertClient: InsertClient): Promise<Client | undefined> {
+    const result = await this.db
+      .update(clients)
+      .set(insertClient)
+      .where(eq(clients.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteClient(id: string): Promise<boolean> {
+    const result = await this.db.delete(clients).where(eq(clients.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined> {
+    const client = await this.getClient(clientId);
+    if (!client) {
+      return undefined;
+    }
+
+    const newActivity = {
+      id: randomUUID(),
+      action: activity.action,
+      user: activity.user,
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    const updatedHistory = [newActivity, ...(client.activityHistory || [])];
+    const result = await this.db
+      .update(clients)
+      .set({ activityHistory: updatedHistory })
+      .where(eq(clients.id, clientId))
+      .returning();
+    
+    return result[0];
+  }
+
+  async deleteActivity(clientId: string, activityId: string): Promise<Client | undefined> {
+    const client = await this.getClient(clientId);
+    if (!client) {
+      return undefined;
+    }
+
+    const updatedHistory = (client.activityHistory || []).filter(a => a.id !== activityId);
+    const result = await this.db
+      .update(clients)
+      .set({ activityHistory: updatedHistory })
+      .where(eq(clients.id, clientId))
+      .returning();
+    
+    return result[0];
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -222,4 +307,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
