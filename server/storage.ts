@@ -365,13 +365,20 @@ export class MemStorage implements IStorage {
     const client: Client = {
       ...insertClient,
       id,
-      status: insertClient.status === null ? "" : insertClient.status,
+      value: typeof insertClient.value === 'string' ? parseFloat(insertClient.value) : insertClient.value,
+      status: insertClient.status,
       linkedin: insertClient.linkedin || "",
       notes: insertClient.notes || "",
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
+      responsiblePersonId: null,
+      source: "Other",
+      industry: null,
+      estimatedCloseDate: null,
+      winProbability: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this.clients.set(id, client);
     return client;
@@ -386,13 +393,20 @@ export class MemStorage implements IStorage {
     const updated: Client = {
       ...insertClient,
       id,
-      status: insertClient.status === null ? "" : insertClient.status,
+      value: typeof insertClient.value === 'string' ? parseFloat(insertClient.value) : insertClient.value,
+      status: insertClient.status,
       linkedin: insertClient.linkedin || "",
       notes: insertClient.notes || "",
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
+      responsiblePersonId: existing.responsiblePersonId,
+      source: existing.source,
+      industry: existing.industry,
+      estimatedCloseDate: existing.estimatedCloseDate,
+      winProbability: existing.winProbability,
       createdAt: existing.createdAt,
+      updatedAt: new Date(),
     };
     this.clients.set(id, updated);
     return updated;
@@ -440,4 +454,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = process.env.DATABASE_URL ? new DbStorage() : new MemStorage();
+// Using in-memory storage as per development guidelines
+export const storage = new MemStorage();
