@@ -8,7 +8,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  if (!status || status === "") return <span className="text-muted-foreground" data-testid="text-status-empty">—</span>;
+  if (!status) return <span className="text-muted-foreground" data-testid="text-status-empty">—</span>;
 
   const getStatusConfig = () => {
     switch (status) {
