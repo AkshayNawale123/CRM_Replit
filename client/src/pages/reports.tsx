@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClientTable } from "@/components/client-table";
 import { ClientDetailsDialog } from "@/components/client-details-dialog";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -20,10 +20,15 @@ import {
 
 const ITEMS_PER_PAGE = 10;
 
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortOrder = 'asc' | 'desc';
+
 export default function Reports() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<SortField>('createdAt');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const { data: clients = [], isLoading, error } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
@@ -42,11 +47,74 @@ export default function Reports() {
 
   const totalPages = Math.ceil(totalClients / ITEMS_PER_PAGE);
 
+  // Clamp current page when data changes
+  useEffect(() => {
+    if (clients.length === 0) {
+      setCurrentPage(1);
+    } else if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(Math.max(1, totalPages));
+    }
+  }, [clients.length, totalPages, currentPage]);
+
+  const sortedClients = useMemo(() => {
+    const sorted = [...clients].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+
+      // Handle null/undefined values symmetrically
+      const aIsNull = aValue === null || aValue === undefined;
+      const bIsNull = bValue === null || bValue === undefined;
+      
+      if (aIsNull && bIsNull) return 0;
+      if (aIsNull) return sortOrder === 'asc' ? 1 : -1;
+      if (bIsNull) return sortOrder === 'asc' ? -1 : 1;
+
+      // Convert dates to timestamps for comparison
+      if (sortField === 'lastFollowUp' || sortField === 'createdAt') {
+        const aTime = new Date(aValue).getTime();
+        const bTime = new Date(bValue).getTime();
+        
+        // Check for invalid dates
+        if (isNaN(aTime) && isNaN(bTime)) return 0;
+        if (isNaN(aTime)) return sortOrder === 'asc' ? 1 : -1;
+        if (isNaN(bTime)) return sortOrder === 'asc' ? -1 : 1;
+        
+        aValue = aTime;
+        bValue = bTime;
+      }
+
+      // String comparison
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortOrder === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      // Numeric comparison
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      } else {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      }
+    });
+    return sorted;
+  }, [clients, sortField, sortOrder]);
+
   const paginatedClients = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return clients.slice(startIndex, endIndex);
-  }, [clients, currentPage]);
+    return sortedClients.slice(startIndex, endIndex);
+  }, [sortedClients, currentPage]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1); // Reset to first page on sort
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -191,7 +259,13 @@ export default function Reports() {
             </Card>
           ) : (
             <>
-              <ClientTable clients={paginatedClients} onEditClient={handleViewDetails} />
+              <ClientTable 
+                clients={paginatedClients} 
+                onEditClient={handleViewDetails}
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+              />
               
               {totalPages > 1 && (
                 <Card>

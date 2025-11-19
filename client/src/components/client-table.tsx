@@ -3,16 +3,22 @@ import { Button } from "@/components/ui/button";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
+
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortOrder = 'asc' | 'desc';
 
 interface ClientTableProps {
   clients: Client[];
   onEditClient: (client: Client) => void;
+  sortField?: SortField;
+  sortOrder?: SortOrder;
+  onSort?: (field: SortField) => void;
 }
 
-export function ClientTable({ clients, onEditClient }: ClientTableProps) {
+export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSort }: ClientTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -34,21 +40,68 @@ export function ClientTable({ clients, onEditClient }: ClientTableProps) {
     return Math.max(0, days);
   };
 
+  const SortableHeader = ({ 
+    field, 
+    children, 
+    align = 'left' 
+  }: { 
+    field: SortField; 
+    children: React.ReactNode;
+    align?: 'left' | 'right' | 'center';
+  }) => {
+    const isActive = sortField === field;
+    const alignClass = align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : '';
+    
+    const SortIcon = () => {
+      if (!isActive) {
+        return <ArrowUpDown className="h-3 w-3" />;
+      }
+      return sortOrder === 'asc' ? (
+        <ArrowUp className="h-3 w-3" />
+      ) : (
+        <ArrowDown className="h-3 w-3" />
+      );
+    };
+    
+    return (
+      <TableHead 
+        className={`font-semibold py-2 px-3 text-xs ${alignClass}`}
+      >
+        {onSort ? (
+          <button
+            onClick={() => onSort(field)}
+            className={`flex items-center gap-1 hover-elevate active-elevate-2 px-2 py-1 rounded-md transition-colors ${
+              align === 'right' ? 'ml-auto' : align === 'center' ? 'mx-auto' : ''
+            } ${
+              isActive ? 'text-primary font-bold' : 'text-foreground'
+            }`}
+            data-testid={`button-sort-${field}`}
+          >
+            {children}
+            <SortIcon />
+          </button>
+        ) : (
+          <span>{children}</span>
+        )}
+      </TableHead>
+    );
+  };
+
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader className="sticky top-0 z-10 bg-muted/50">
             <TableRow>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Client</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Stage</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Status</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs text-right">Value</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Last Follow-up</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Responsible Person</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Country</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs">Priority</TableHead>
-              <TableHead className="font-semibold py-2 px-3 text-xs text-center">Days in Pipeline</TableHead>
+              <SortableHeader field="companyName">Client</SortableHeader>
+              <SortableHeader field="stage">Stage</SortableHeader>
+              <SortableHeader field="status">Status</SortableHeader>
+              <SortableHeader field="value" align="right">Value</SortableHeader>
+              <SortableHeader field="lastFollowUp">Last Follow-up</SortableHeader>
+              <SortableHeader field="responsiblePerson">Responsible Person</SortableHeader>
+              <SortableHeader field="country">Country</SortableHeader>
+              <SortableHeader field="priority">Priority</SortableHeader>
+              <SortableHeader field="createdAt" align="center">Days in Pipeline</SortableHeader>
               <TableHead className="font-semibold py-2 px-3 text-xs text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
