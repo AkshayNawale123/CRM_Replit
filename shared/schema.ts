@@ -144,7 +144,8 @@ export const insertClientSchema = createInsertSchema(clients).omit({
 });
 
 export type InsertClient = z.infer<typeof insertClientSchema>;
-export type Client = typeof clients.$inferSelect & {
+export type Client = Omit<typeof clients.$inferSelect, 'value'> & {
+  value: number;
   responsiblePerson?: string;
   activityHistory?: Activity[];
 };
