@@ -104,14 +104,14 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+        <DialogHeader className="px-4 pt-4 pb-3 border-b">
           <div className="flex items-start justify-between">
-            <DialogTitle className="text-2xl font-semibold">
+            <DialogTitle className="text-xl font-semibold">
               {client.companyName}
             </DialogTitle>
             <div className="flex items-center gap-2">
               <div className="flex flex-col items-end">
-                <span className="text-xs text-muted-foreground mb-1">Priority</span>
+                <span className="text-xs text-muted-foreground mb-0.5">Priority</span>
                 <PriorityBadge priority={client.priority as any} />
               </div>
               {onEdit && (
@@ -119,9 +119,9 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                   variant="outline"
                   size="sm"
                   onClick={onEdit}
-                  className="gap-2"
+                  className="gap-1 h-8 px-2 text-xs"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3" />
                   Edit
                 </Button>
               )}
@@ -129,58 +129,58 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
           </div>
         </DialogHeader>
 
-        <div className="px-6 pb-6 space-y-6">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-1">Project Value</div>
-              <div className="text-2xl font-bold">{formatCurrency(client.value)}</div>
+        <div className="px-4 pb-4 space-y-3">
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Project Value</div>
+              <div className="text-xl font-bold">{formatCurrency(client.value)}</div>
             </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-2">Stage</div>
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Stage</div>
               <StageBadge stage={client.stage as any} />
             </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-2">Status</div>
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Status</div>
               <StatusBadge status={client.status as any} />
             </div>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div className="text-sm text-muted-foreground mb-2">Priority</div>
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Priority</div>
               <PriorityBadge priority={client.priority as any} />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-blue-500" />
-              <h3 className="text-lg font-semibold">Contact Information</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-blue-500" />
+              <h3 className="text-base font-semibold">Contact Information</h3>
             </div>
-            <div className="bg-muted/10 rounded-lg p-4">
-              <div className="grid grid-cols-3 gap-6">
+            <div className="bg-muted/10 rounded-lg p-3">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Contact Person</div>
-                  <div className="font-semibold">{client.contactPerson}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Contact Person</div>
+                  <div className="font-semibold text-sm">{client.contactPerson}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Email</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Email</div>
                   <a
                     href={`mailto:${client.email}`}
-                    className="font-medium text-blue-600 hover:underline"
+                    className="font-medium text-sm text-blue-600 hover:underline"
                   >
                     {client.email}
                   </a>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Phone</div>
-                  <div className="font-medium">{client.phone}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Phone</div>
+                  <div className="font-medium text-sm">{client.phone}</div>
                 </div>
                 {client.linkedin && (
                   <div className="col-span-3">
-                    <div className="text-sm text-muted-foreground mb-1">LinkedIn</div>
+                    <div className="text-xs text-muted-foreground mb-0.5">LinkedIn</div>
                     <a
                       href={client.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-blue-600 hover:underline"
+                      className="font-medium text-sm text-blue-600 hover:underline"
                     >
                       {client.linkedin}
                     </a>
@@ -190,72 +190,74 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-500" />
-              <h3 className="text-lg font-semibold">Account Management</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-green-500" />
+              <h3 className="text-base font-semibold">Account Management</h3>
             </div>
-            <div className="bg-muted/10 rounded-lg p-4">
-              <div className="grid grid-cols-3 gap-6">
+            <div className="bg-muted/10 rounded-lg p-3">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Last Follow-up</div>
-                  <div className="text-lg font-semibold">{formatDate(client.lastFollowUp)}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Last Follow-up</div>
+                  <div className="text-base font-semibold">{formatDate(client.lastFollowUp)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Next Follow-up</div>
-                  <div className="text-lg font-semibold">{formatDate(client.nextFollowUp)}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Next Follow-up</div>
+                  <div className="text-base font-semibold">{formatDate(client.nextFollowUp)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Responsible Person</div>
-                  <div className="text-lg font-semibold">{client.responsiblePerson}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Responsible Person</div>
+                  <div className="text-base font-semibold">{client.responsiblePerson}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Country</div>
-                  <div className="text-lg font-semibold">{client.country}</div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Country</div>
+                  <div className="text-base font-semibold">{client.country}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Notes</h3>
-            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-4 border border-amber-200 dark:border-amber-900">
-              <p className="text-sm text-foreground">{client.notes || "No notes available."}</p>
+          <div className="space-y-2">
+            <h3 className="text-base font-semibold">Notes</h3>
+            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 border border-amber-200 dark:border-amber-900">
+              <p className="text-xs text-foreground">{client.notes || "No notes available."}</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Activity History</h3>
+              <h3 className="text-base font-semibold">Activity History</h3>
               {!isAddingActivity && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAddingActivity(true)}
-                  className="gap-2"
+                  className="gap-1 h-7 px-2 text-xs"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3" />
                   Add Activity
                 </Button>
               )}
             </div>
             
             {isAddingActivity && (
-              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Activity Description</label>
+              <div className="bg-muted/30 rounded-lg p-3 space-y-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium">Activity Description</label>
                   <Input
                     placeholder="e.g., Follow-up call completed"
                     value={newActivity.action}
                     onChange={(e) => setNewActivity({ ...newActivity, action: e.target.value })}
+                    className="h-8 text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Your Name</label>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium">Your Name</label>
                   <Input
                     placeholder="e.g., John Smith"
                     value={newActivity.user}
                     onChange={(e) => setNewActivity({ ...newActivity, user: e.target.value })}
+                    className="h-8 text-sm"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -263,6 +265,7 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                     onClick={handleAddActivity}
                     disabled={!newActivity.action.trim() || !newActivity.user.trim() || addActivityMutation.isPending}
                     size="sm"
+                    className="h-7 px-2 text-xs"
                   >
                     {addActivityMutation.isPending ? "Adding..." : "Add"}
                   </Button>
@@ -273,6 +276,7 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                       setIsAddingActivity(false);
                       setNewActivity({ action: "", user: "" });
                     }}
+                    className="h-7 px-2 text-xs"
                   >
                     Cancel
                   </Button>
@@ -280,17 +284,17 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
               </div>
             )}
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {client.activityHistory && client.activityHistory.length > 0 ? (
                 client.activityHistory.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0 group">
-                    <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                  <div key={activity.id} className="flex items-start gap-2 pb-2 border-b last:border-0 group">
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground">{activity.action}</div>
-                      <div className="text-sm text-muted-foreground">by {activity.user}</div>
+                      <div className="font-medium text-foreground text-sm">{activity.action}</div>
+                      <div className="text-xs text-muted-foreground">by {activity.user}</div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-sm text-muted-foreground whitespace-nowrap">
+                      <div className="text-xs text-muted-foreground whitespace-nowrap">
                         {activity.date}
                       </div>
                       <Button
@@ -298,15 +302,15 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                         size="sm"
                         onClick={() => deleteActivityMutation.mutate(activity.id)}
                         disabled={deleteActivityMutation.isPending}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-3 w-3 text-destructive" />
                       </Button>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">No activity history available.</p>
+                <p className="text-xs text-muted-foreground">No activity history available.</p>
               )}
             </div>
           </div>
