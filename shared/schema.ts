@@ -144,9 +144,8 @@ export const clientFormSchema = z.object({
     "Pending Review",
     "Awaiting Response",
     "Under Evaluation",
-    "Budget Approval Pending",
-    "none"
-  ]),
+    "Budget Approval Pending"
+  ]).nullable(),
   value: z.number().min(0, "Value must be positive"),
   priority: z.enum(["High", "Medium", "Low"]),
   responsiblePerson: z.string().min(1, "Responsible person is required"),
@@ -189,9 +188,8 @@ export const insertClientSchema = createInsertSchema(clients).omit({
     "Pending Review",
     "Awaiting Response",
     "Under Evaluation",
-    "Budget Approval Pending",
-    "none"
-  ]).transform(val => val === "none" ? null : val).nullable(),
+    "Budget Approval Pending"
+  ]).nullable(),
   priority: z.enum(["High", "Medium", "Low"]),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
@@ -224,13 +222,13 @@ export const stageOptions = [
   "Lost"
 ] as const;
 export const statusOptions = [
+  null,
   "In Negotiation",
   "Proposal Rejected",
   "On Hold",
   "Pending Review",
   "Awaiting Response",
   "Under Evaluation",
-  "Budget Approval Pending",
-  "none"
+  "Budget Approval Pending"
 ] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;

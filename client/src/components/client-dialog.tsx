@@ -33,7 +33,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       email: "",
       phone: "",
       stage: "Lead" as const,
-      status: "none" as const,
+      status: null,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
       nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
@@ -53,7 +53,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         email: client.email,
         phone: client.phone,
         stage: client.stage as ClientFormData["stage"],
-        status: (client.status || "none") as ClientFormData["status"],
+        status: client.status as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
         nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
@@ -70,7 +70,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         email: "",
         phone: "",
         stage: "Lead",
-        status: "none",
+        status: null,
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
         nextFollowUp: format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
@@ -86,7 +86,6 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
   const handleSubmit = (data: ClientFormData) => {
     onSubmit({
       ...data,
-      status: data.status === "none" ? null : data.status,
       activityHistory: client?.activityHistory || [],
     } as unknown as InsertClient);
   };
@@ -223,7 +222,10 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === "" ? null : value)} 
+                        value={field.value ?? ""}
+                      >
                         <FormControl>
                           <SelectTrigger data-testid="select-status">
                             <SelectValue placeholder="Select status" />
@@ -231,8 +233,12 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                         </FormControl>
                         <SelectContent>
                           {statusOptions.map((status) => (
-                            <SelectItem key={status || 'none'} value={status || 'none'} data-testid={`option-status-${status ? status.toLowerCase().replace(/\s+/g, '-') : 'none'}`}>
-                              {status || 'None'}
+                            <SelectItem 
+                              key={status ?? 'none'} 
+                              value={status ?? ""} 
+                              data-testid={`option-status-${status ? status.toLowerCase().replace(/\s+/g, '-') : 'none'}`}
+                            >
+                              {status ?? 'None'}
                             </SelectItem>
                           ))}
                         </SelectContent>

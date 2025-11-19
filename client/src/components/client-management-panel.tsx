@@ -86,7 +86,7 @@ export function ClientManagementPanel({
       email: "",
       phone: "",
       stage: "Lead" as const,
-      status: "none" as const,
+      status: null,
       value: 0,
       lastFollowUp: format(new Date(), "yyyy-MM-dd"),
       nextFollowUp: format(
@@ -109,7 +109,7 @@ export function ClientManagementPanel({
         email: client.email,
         phone: client.phone,
         stage: client.stage as ClientFormData["stage"],
-        status: (client.status || "none") as ClientFormData["status"],
+        status: client.status as ClientFormData["status"],
         value: client.value,
         lastFollowUp: format(new Date(client.lastFollowUp), "yyyy-MM-dd"),
         nextFollowUp: format(new Date(client.nextFollowUp), "yyyy-MM-dd"),
@@ -126,7 +126,7 @@ export function ClientManagementPanel({
         email: "",
         phone: "",
         stage: "Lead",
-        status: "none",
+        status: null,
         value: 0,
         lastFollowUp: format(new Date(), "yyyy-MM-dd"),
         nextFollowUp: format(
@@ -145,7 +145,6 @@ export function ClientManagementPanel({
   const handleSubmit = (data: ClientFormData) => {
     onSubmit({
       ...data,
-      status: data.status === "none" ? null : data.status,
       activityHistory: client?.activityHistory || [],
     } as unknown as InsertClient);
   };
@@ -510,8 +509,8 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Status</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+                          onValueChange={(value) => field.onChange(value === "" ? null : value)}
+                          value={field.value ?? ""}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -521,10 +520,10 @@ export function ClientManagementPanel({
                           <SelectContent>
                             {statusOptions.map((status) => (
                               <SelectItem
-                                key={status || "none"}
-                                value={status || "none"}
+                                key={status ?? "none"}
+                                value={status ?? ""}
                               >
-                                {status || "None"}
+                                {status ?? "None"}
                               </SelectItem>
                             ))}
                           </SelectContent>
