@@ -100,7 +100,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
               <SortableHeader field="stage">Stage</SortableHeader>
               <SortableHeader field="status">Status</SortableHeader>
               <SortableHeader field="value" align="right">Value</SortableHeader>
-              <SortableHeader field="valueINR" align="right">Value (in INR)</SortableHeader>
+              <SortableHeader field="valueINR" align="right">Value (₹)</SortableHeader>
               <SortableHeader field="lastFollowUp">Last Follow-up</SortableHeader>
               <SortableHeader field="responsiblePerson">Responsible Person</SortableHeader>
               <SortableHeader field="country">Country</SortableHeader>
