@@ -9,7 +9,6 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Client, InsertClient } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExcelImportExport } from "@/components/excel-import-export";
 
 export default function Dashboard() {
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
@@ -113,22 +112,13 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-screen bg-background">
       <Navigation />
-      <div className="border-b bg-background">
-        <div className="px-4 py-3">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">
-                Client Portfolio
-              </h1>
-              <p className="text-muted-foreground mt-0.5 text-sm">
-                Manage all client relationships and deal pipeline
-              </p>
-            </div>
-            <div className="lg:max-w-md w-full">
-              <ExcelImportExport />
-            </div>
-          </div>
-        </div>
+      <div className="border-b bg-background px-4 py-3">
+        <h1 className="text-2xl font-semibold text-foreground">
+          Client Portfolio
+        </h1>
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          Manage all client relationships and deal pipeline
+        </p>
       </div>
 
       <div className="flex-1 overflow-hidden">

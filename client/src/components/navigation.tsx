@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, FileText, BookOpen, LogOut, BarChart3 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { ExcelButtons } from "@/components/excel-buttons";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -55,16 +56,19 @@ export function Navigation() {
           </Button>
         </Link>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-2"
-        onClick={logout}
-        data-testid="button-logout"
-      >
-        <LogOut className="h-4 w-4" />
-        Logout
-      </Button>
+      <div className="flex items-center gap-3">
+        <ExcelButtons />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2"
+          onClick={logout}
+          data-testid="button-logout"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
     </nav>
   );
 }
