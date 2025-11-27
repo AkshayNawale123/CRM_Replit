@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClientTable } from "@/components/client-table";
 import { ClientDetailsDialog } from "@/components/client-details-dialog";
-import { ExcelImportExport } from "@/components/excel-import-export";
 import { useState, useMemo, useEffect } from "react";
 import { convertToINR } from "@/lib/country-currency-data";
 import {
@@ -247,8 +246,6 @@ export default function Reports() {
             />
           </div>
         )}
-
-        <ExcelImportExport />
 
         <div className="space-y-3">
           {isLoading ? (
