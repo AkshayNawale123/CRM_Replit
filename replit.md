@@ -199,15 +199,12 @@ Preferred communication style: Simple, everyday language.
     - Filter popover with stage/priority dropdowns (replaces separate filter bar)
     - Search functionality and client count display
     - Add Client button accessible in header
-  - **ClientManagementPanel** (right panel, view mode):
-    - Header with company name, contact info, Edit and Close buttons
-    - Horizontal badge row showing Stage, Priority, Service, Status
-    - Two-column Contact/Deal information layout (side-by-side, not separate cards)
-    - Combined Notes & Activities section with timeline
-    - Bottom action bar: Schedule Follow-up, Send Email, Update Status, Delete Client
+  - **ClientManagementPanel** (right panel):
+    - **View mode**: Header with company name, contact info, Edit and Close buttons; horizontal badge row showing Stage, Priority, Service, Status; two-column Contact/Deal information layout; combined Notes & Activities section with timeline; NO action bar buttons
+    - **Edit mode**: Full edit form with delete button and confirmation dialog
   - Currency label updated to "Deal Value (Currency as per Country)"
   - Country alias support (USA, UK, UAE abbreviations) for robust currency lookup
-  - Full CRUD functionality preserved (create, read, update, delete accessible from UI)
+  - Full CRUD functionality preserved (create, read, update, delete accessible from UI via edit mode)
 
 - **Excel Import/Export Buttons Relocated**: Moved to navigation header for cleaner layout
   - Download Template and Upload Excel buttons now in navigation bar, next to Logout button

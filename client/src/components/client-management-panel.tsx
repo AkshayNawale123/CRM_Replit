@@ -31,7 +31,6 @@ import {
 } from "@shared/schema";
 import { format } from "date-fns";
 import {
-  Trash2,
   Edit,
   X,
   Mail,
@@ -40,11 +39,9 @@ import {
   MapPin,
   User,
   Globe,
-  CalendarPlus,
-  Send,
-  RefreshCw,
   FileText,
   Briefcase,
+  Trash2,
 } from "lucide-react";
 import { CountrySelect } from "./country-select";
 import { ServiceSelect } from "./service-select";
@@ -411,70 +408,6 @@ export function ClientManagementPanel({
             </div>
           </div>
         </ScrollArea>
-
-        {/* Action Bar */}
-        <div className="p-4 border-t bg-background space-y-2">
-          <div className="flex gap-2">
-            <Button
-              className="flex-1 gap-2"
-              onClick={() => onChangeMode("edit")}
-              data-testid="button-schedule-followup"
-            >
-              <CalendarPlus className="h-4 w-4" />
-              Schedule Follow-up
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 gap-2"
-              onClick={() => window.location.href = `mailto:${client.email}`}
-              data-testid="button-send-email"
-            >
-              <Send className="h-4 w-4" />
-              Send Email
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 gap-2"
-              onClick={() => onChangeMode("edit")}
-              data-testid="button-update-status"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Update Status
-            </Button>
-          </div>
-          {onDelete && (
-            <Button
-              variant="ghost"
-              className="w-full gap-2 text-destructive hover:text-destructive"
-              onClick={() => setShowDeleteDialog(true)}
-              data-testid="button-delete-client"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Client
-            </Button>
-          )}
-        </div>
-
-        {/* Delete Dialog */}
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Client</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this client? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     );
   }
