@@ -73,8 +73,19 @@ export const countries: CountryData[] = [
   { name: "Vietnam", code: "VN", currency: "VND", currencySymbol: "₫", exchangeRateToINR: 0.0034 },
 ];
 
+const countryAliases: Record<string, string> = {
+  "uae": "United Arab Emirates",
+  "usa": "United States",
+  "uk": "United Kingdom",
+  "usd": "United States",
+  "gbp": "United Kingdom",
+  "eur": "Germany",
+};
+
 export function getCountryByName(name: string): CountryData | undefined {
-  return countries.find(c => c.name.toLowerCase() === name.toLowerCase());
+  const lowerName = name.toLowerCase();
+  const normalizedName = countryAliases[lowerName] || name;
+  return countries.find(c => c.name.toLowerCase() === normalizedName.toLowerCase());
 }
 
 export function getCurrencyByCountry(countryName: string): { currency: string; symbol: string; rate: number } | null {
@@ -123,6 +134,19 @@ export function formatCurrencyByCountry(value: number, countryName: string): str
   } catch {
     return `${country.currencySymbol}${value.toLocaleString()}`;
   }
+}
+
+export function formatCompactCurrencyByCountry(value: number, countryName: string): string {
+  const country = getCountryByName(countryName);
+  const symbol = country?.currencySymbol || "$";
+  
+  if (value >= 1000000) {
+    return `${symbol}${(value / 1000000).toFixed(1)}M`;
+  }
+  if (value >= 1000) {
+    return `${symbol}${(value / 1000).toFixed(0)}K`;
+  }
+  return `${symbol}${value.toLocaleString()}`;
 }
 
 export function searchCountries(query: string): CountryData[] {

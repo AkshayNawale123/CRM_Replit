@@ -6,6 +6,7 @@ import { PriorityBadge } from "./priority-badge";
 import { Search, Plus } from "lucide-react";
 import type { Client } from "@shared/schema";
 import { useState, useMemo } from "react";
+import { formatCompactCurrencyByCountry } from "@/lib/country-currency-data";
 
 interface ClientListPanelProps {
   clients: Client[];
@@ -32,16 +33,6 @@ export function ClientListPanel({ clients, selectedClientId, onSelectClient, onA
         (client.responsiblePerson && client.responsiblePerson.toLowerCase().includes(query))
     );
   }, [clients, searchQuery]);
-
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(1)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value}`;
-  };
 
   return (
     <div className="flex flex-col h-full bg-muted/20">
@@ -91,7 +82,7 @@ export function ClientListPanel({ clients, selectedClientId, onSelectClient, onA
                     <div className="text-sm text-muted-foreground truncate">{client.contactPerson}</div>
                   </div>
                   <div className="text-sm font-semibold text-right whitespace-nowrap">
-                    {formatCurrency(client.value)}
+                    {formatCompactCurrencyByCountry(client.value, client.country)}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">

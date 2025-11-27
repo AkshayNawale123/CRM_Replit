@@ -10,6 +10,7 @@ import { PriorityBadge } from "./priority-badge";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { useToast } from "@/hooks/use-toast";
+import { formatCompactCurrencyByCountry, formatCurrencyByCountry } from "@/lib/country-currency-data";
 
 interface ClientDetailsDialogProps {
   open: boolean;
@@ -84,16 +85,6 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
     }
   };
 
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value}`;
-  };
-
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === "string" ? new Date(date) : date;
     return format(dateObj, "MM/dd/yyyy");
@@ -133,7 +124,7 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
           <div className="grid grid-cols-4 gap-2">
             <div className="bg-muted/30 rounded-lg p-3">
               <div className="text-xs text-muted-foreground mb-1">Project Value</div>
-              <div className="text-xl font-bold">{formatCurrency(client.value)}</div>
+              <div className="text-xl font-bold">{formatCompactCurrencyByCountry(client.value, client.country)}</div>
             </div>
             <div className="bg-muted/30 rounded-lg p-3">
               <div className="text-xs text-muted-foreground mb-1">Stage</div>
