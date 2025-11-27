@@ -125,9 +125,10 @@ Preferred communication style: Simple, everyday language.
   - Value stored in local currency (currency auto-detected from country)
 
 - **Analytics Dashboard**: New comprehensive analytics page with 4 views
-  - **Overview**: KPI cards (Total Pipeline, Win Rate, Avg Deal Size, Avg Cycle Time), Pipeline by Stage chart, Cycle Time Distribution, Priority Distribution pie chart, Action Items (high priority follow-ups, stalled negotiations, conversion opportunities)
-  - **Pipeline**: Sales Funnel visualization, Deal Health scatter plot (days in pipeline vs deal value)
+  - **Overview**: KPI cards (Active Pipeline, Win Rate, Avg Won Deal, Avg Cycle Time), Pipeline by Stage chart, Cycle Time Distribution, Priority Distribution pie chart, Action Items (high priority follow-ups, stalled negotiations, conversion opportunities)
+  - **Pipeline**: Sales Funnel visualization (active pipeline stages only), Deal Health scatter plot (days in pipeline vs deal value)
   - **Performance**: Team performance bar chart, individual team member cards with deals, pipeline value, won deals, and avg deal size
   - **Geographic**: Country-wise distribution charts, individual country cards with deal counts and values
   - All values displayed in INR using the country-currency conversion system
   - Navigation: Create Client → Reports → Analytics → Glossary
+  - **Metrics Separation**: Active pipeline metrics (stage charts, funnel, cycle time) only include non-Won/Lost deals; Win rate and Avg Won Deal calculated from closed deals (Won + Lost)
