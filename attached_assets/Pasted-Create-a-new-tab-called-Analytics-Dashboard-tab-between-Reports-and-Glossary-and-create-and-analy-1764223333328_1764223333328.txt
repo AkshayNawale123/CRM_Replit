@@ -1,0 +1,469 @@
+Create a new tab called 'Analytics Dashboard' tab between Reports and Glossary, and create and analyse this code and implement something similar fashion a comprehensive CRM Analytics Dashboard here's what I've included:
+Dashboard Features:
+4 Different Views:
+
+Overview - High-level metrics and trends
+Pipeline - Sales funnel and deal health analysis
+Performance - Team member performance tracking
+Geographic - Country-wise distribution
+
+Key Components:
+KPI Cards:
+
+Total Pipeline Value with growth trend
+Win Rate percentage
+Average Deal Size
+Average Cycle Time
+
+Interactive Charts:
+
+Pipeline growth trend (line chart)
+Stage distribution (bar charts)
+Priority breakdown (pie chart)
+Sales funnel conversion
+Deal health scatter plot
+Team performance comparison
+Geographic distribution
+
+Action Items:
+
+Alerts for high-priority follow-ups
+Stalled negotiation warnings
+Conversion opportunities 
+
+
+Sample code to be studied:
+
+import React, { useState } from 'react';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, FunnelChart, Funnel, LabelList } from 'recharts';
+import { TrendingUp, TrendingDown, Users, DollarSign, AlertCircle, Calendar, Award, Target } from 'lucide-react';
+
+const CRMDashboard = () => {
+  const [selectedView, setSelectedView] = useState('overview');
+
+  // Sample data based on the client report
+  const clients = [
+    { name: 'GreenEnergy Corp', stage: 'Lead', status: '', value: 210000, valueINR: 19152000, lastFollowup: '11/16/2025', person: 'Tom Williams', country: 'Germany', priority: 'MEDIUM', days: 11 },
+    { name: 'Innovation Hub', stage: 'Lead', status: '', value: 95000, valueINR: 5177500, lastFollowup: '11/14/2025', person: 'Tom Williams', country: 'Australia', priority: 'LOW', days: 13 },
+    { name: 'CloudFirst Technologies', stage: 'Lead', status: '', value: 150000, valueINR: 12525000, lastFollowup: '11/13/2025', person: 'Tom Williams', country: 'United States', priority: 'MEDIUM', days: 14 },
+    { name: 'FutureTech Systems', stage: 'Proposal Sent', status: 'In Negotiation', value: 320000, valueINR: 20000000, lastFollowup: '11/18/2025', person: 'Sarah Johnson', country: 'Singapore', priority: 'HIGH', days: 15 },
+    { name: 'RetailMax Corporation', stage: 'Lead', status: '', value: 125000, valueINR: 6812500, lastFollowup: '11/12/2025', person: 'Tom Williams', country: 'Australia', priority: 'LOW', days: 15 },
+    { name: 'EduPlatform Inc', stage: 'Qualified', status: 'In Negotiation', value: 175000, valueINR: 18637500, lastFollowup: '11/15/2025', person: 'Sarah Johnson', country: 'United Kingdom', priority: 'MEDIUM', days: 16 },
+    { name: 'DataVision Analytics', stage: 'Qualified', status: 'In Negotiation', value: 280000, valueINR: 17136000, lastFollowup: '11/19/2025', person: 'Mike Davis', country: 'Canada', priority: 'HIGH', days: 17 },
+    { name: 'SecureNet Systems', stage: 'Proposal Sent', status: 'In Negotiation', value: 390000, valueINR: 32565000, lastFollowup: '11/17/2025', person: 'Sarah Johnson', country: 'United States', priority: 'HIGH', days: 18 },
+    { name: 'TechStart Inc', stage: 'Proposal Sent', status: 'Proposal Rejected', value: 180000, valueINR: 11016000, lastFollowup: '11/16/2025', person: 'Tom Williams', country: 'Canada', priority: 'MEDIUM', days: 19 },
+    { name: 'FinServe Group', stage: 'Proposal Sent', status: 'Proposal Rejected', value: 340000, valueINR: 21250000, lastFollowup: '11/14/2025', person: 'Tom Williams', country: 'Singapore', priority: 'LOW', days: 21 },
+  ];
+
+  // KPI Calculations
+  const totalClients = 13;
+  const won = 2;
+  const inNegotiation = 5;
+  const rejected = 2;
+  const totalPipeline = 3460000;
+
+  const winRate = ((won / (won + rejected)) * 100).toFixed(1);
+  const avgDealSize = (totalPipeline / totalClients).toFixed(0);
+  const avgDaysInPipeline = (clients.reduce((sum, c) => sum + c.days, 0) / clients.length).toFixed(0);
+
+  // Stage Funnel Data
+  const funnelData = [
+    { name: 'Lead', value: 5, fill: '#3b82f6' },
+    { name: 'Qualified', value: 2, fill: '#8b5cf6' },
+    { name: 'Proposal Sent', value: 4, fill: '#f59e0b' },
+    { name: 'In Negotiation', value: 5, fill: '#10b981' },
+    { name: 'Won', value: 2, fill: '#22c55e' },
+  ];
+
+  // Pipeline by Stage
+  const stageData = [
+    { stage: 'Lead', count: 5, value: 580000 },
+    { stage: 'Qualified', count: 2, value: 455000 },
+    { stage: 'Proposal Sent', count: 4, value: 1230000 },
+    { stage: 'In Negotiation', count: 5, value: 1195000 },
+  ];
+
+  // Priority Distribution
+  const priorityData = [
+    { name: 'High', value: 3, amount: 990000, fill: '#ef4444' },
+    { name: 'Medium', value: 5, amount: 1235000, fill: '#f59e0b' },
+    { name: 'Low', value: 3, amount: 560000, fill: '#3b82f6' },
+  ];
+
+  // Country Distribution
+  const countryData = [
+    { country: 'United States', deals: 2, value: 540000 },
+    { country: 'Singapore', deals: 2, value: 660000 },
+    { country: 'Canada', deals: 2, value: 460000 },
+    { country: 'Australia', deals: 2, value: 220000 },
+    { country: 'Germany', deals: 1, value: 210000 },
+    { country: 'United Kingdom', deals: 1, value: 175000 },
+  ];
+
+  // Performance by Person
+  const personData = [
+    { name: 'Tom Williams', deals: 6, value: 1290000, won: 1 },
+    { name: 'Sarah Johnson', deals: 3, value: 885000, won: 0 },
+    { name: 'Mike Davis', deals: 1, value: 280000, won: 0 },
+  ];
+
+  // Days in Pipeline Analysis
+  const daysAnalysis = [
+    { range: '10-14 days', count: 4 },
+    { range: '15-17 days', count: 4 },
+    { range: '18-21 days', count: 2 },
+  ];
+
+  // Time Series (simulated monthly trend)
+  const timeSeriesData = [
+    { month: 'Aug', pipeline: 2800000, deals: 10 },
+    { month: 'Sep', pipeline: 3100000, deals: 11 },
+    { month: 'Oct', pipeline: 3350000, deals: 12 },
+    { month: 'Nov', pipeline: 3460000, deals: 13 },
+  ];
+
+  const COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
+
+  const KPICard = ({ title, value, subtitle, icon: Icon, trend, trendValue }) => (
+    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-gray-600 font-medium">{title}</p>
+          <h3 className="text-3xl font-bold text-gray-900 mt-2">{value}</h3>
+          <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+        </div>
+        <div className={`p-3 rounded-lg ${trend === 'up' ? 'bg-green-100' : trend === 'down' ? 'bg-red-100' : 'bg-blue-100'}`}>
+          <Icon className={`w-6 h-6 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-blue-600'}`} />
+        </div>
+      </div>
+      {trendValue && (
+        <div className="flex items-center mt-3">
+          {trend === 'up' ? <TrendingUp className="w-4 h-4 text-green-600 mr-1" /> : <TrendingDown className="w-4 h-4 text-red-600 mr-1" />}
+          <span className={`text-sm font-medium ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>{trendValue}</span>
+          <span className="text-sm text-gray-500 ml-1">vs last period</span>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">CRM Analytics Dashboard</h1>
+          <p className="text-gray-600">Strategic insights for client relationship management</p>
+        </div>
+
+        {/* View Selector */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          {['overview', 'pipeline', 'performance', 'geographic'].map((view) => (
+            <button
+              key={view}
+              onClick={() => setSelectedView(view)}
+              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                selectedView === view
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {view.charAt(0).toUpperCase() + view.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KPICard
+            title="Total Pipeline"
+            value={`$${(totalPipeline / 1000000).toFixed(2)}M`}
+            subtitle={`${totalClients} active deals`}
+            icon={DollarSign}
+            trend="up"
+            trendValue="+4.2%"
+          />
+          <KPICard
+            title="Win Rate"
+            value={`${winRate}%`}
+            subtitle="2 won, 2 rejected"
+            icon={Award}
+            trend="up"
+            trendValue="+5.3%"
+          />
+          <KPICard
+            title="Avg Deal Size"
+            value={`$${(avgDealSize / 1000).toFixed(0)}K`}
+            subtitle="Per opportunity"
+            icon={Target}
+            trend="up"
+            trendValue="+2.1%"
+          />
+          <KPICard
+            title="Avg Cycle Time"
+            value={`${avgDaysInPipeline} days`}
+            subtitle="In pipeline"
+            icon={Calendar}
+            trend="down"
+            trendValue="-3 days"
+          />
+        </div>
+
+        {/* Overview View */}
+        {selectedView === 'overview' && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Pipeline Trend */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Pipeline Growth Trend</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={timeSeriesData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip formatter={(value) => `$${(value / 1000000).toFixed(2)}M`} />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="pipeline" stroke="#3b82f6" strokeWidth={2} name="Pipeline Value" />
+                    <Line yAxisId="right" type="monotone" dataKey="deals" stroke="#10b981" strokeWidth={2} name="Deal Count" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Stage Distribution */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Pipeline by Stage</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={stageData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="stage" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Bar yAxisId="right" dataKey="count" fill="#8b5cf6" name="Deal Count" />
+                    <Bar yAxisId="left" dataKey="value" fill="#3b82f6" name="Value ($)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Priority Distribution */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Priority Distribution</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={priorityData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={80}
+                      dataKey="value"
+                    >
+                      {priorityData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Days in Pipeline */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Cycle Time Distribution</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={daysAnalysis}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="range" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#f59e0b" name="Deals" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Alerts & Actions */}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Action Items</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start p-3 bg-red-50 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-red-600 mr-2 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-red-900">High Priority Follow-ups</p>
+                      <p className="text-xs text-red-700">3 deals need attention</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start p-3 bg-yellow-50 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-900">Stalled Negotiations</p>
+                      <p className="text-xs text-yellow-700">2 deals over 18 days</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start p-3 bg-blue-50 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">Conversion Opportunity</p>
+                      <p className="text-xs text-blue-700">5 leads ready for qualification</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Pipeline View */}
+        {selectedView === 'pipeline' && (
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Funnel Conversion</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={funnelData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#3b82f6">
+                        {funnelData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-col justify-center space-y-4">
+                  <h4 className="font-semibold text-gray-900">Conversion Metrics</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Lead → Qualified</span>
+                      <span className="font-semibold text-gray-900">40%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Qualified → Proposal</span>
+                      <span className="font-semibold text-gray-900">200%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Proposal → Negotiation</span>
+                      <span className="font-semibold text-gray-900">125%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                      <span className="text-sm text-green-700 font-medium">Negotiation → Won</span>
+                      <span className="font-semibold text-green-700">40%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Pipeline Health Analysis</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="days" name="Days in Pipeline" />
+                  <YAxis dataKey="value" name="Deal Value" />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value) => `$${value.toLocaleString()}`} />
+                  <Legend />
+                  <Scatter name="Deals" data={clients} fill="#3b82f6" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Performance View */}
+        {selectedView === 'performance' && (
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Performance</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={personData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="value" fill="#3b82f6" name="Pipeline Value ($)" />
+                  <Bar yAxisId="right" dataKey="deals" fill="#10b981" name="Active Deals" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {personData.map((person, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-gray-900">{person.name}</h4>
+                    <Users className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-600">Active Deals</p>
+                      <p className="text-2xl font-bold text-gray-900">{person.deals}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Pipeline Value</p>
+                      <p className="text-2xl font-bold text-gray-900">${(person.value / 1000).toFixed(0)}K</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Avg Deal Size</p>
+                      <p className="text-xl font-semibold text-gray-900">${(person.value / person.deals / 1000).toFixed(0)}K</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Geographic View */}
+        {selectedView === 'geographic' && (
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={countryData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="country" angle={-45} textAnchor="end" height={100} />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="value" fill="#3b82f6" name="Pipeline Value ($)" />
+                  <Bar yAxisId="right" dataKey="deals" fill="#10b981" name="Deal Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {countryData.map((country, idx) => (
+                <div key={idx} className="bg-white p-4 rounded-lg shadow-md">
+                  <h4 className="font-semibold text-gray-900 mb-2">{country.country}</h4>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-gray-600">Deals</p>
+                      <p className="text-lg font-bold text-gray-900">{country.deals}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-600">Value</p>
+                      <p className="text-lg font-bold text-blue-600">${(country.value / 1000).toFixed(0)}K</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CRMDashboard;
