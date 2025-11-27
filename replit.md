@@ -208,3 +208,10 @@ Preferred communication style: Simple, everyday language.
   - Currency label updated to "Deal Value (Currency as per Country)"
   - Country alias support (USA, UK, UAE abbreviations) for robust currency lookup
   - Full CRUD functionality preserved (create, read, update, delete accessible from UI)
+
+- **Excel Import/Export Buttons Relocated**: Moved to navigation header for cleaner layout
+  - Download Template and Upload Excel buttons now in navigation bar, next to Logout button
+  - Removed the large Excel Import/Export card from dashboard header
+  - Dashboard content shifted upward for better viewport utilization
+  - All Excel functionality preserved (template download, file upload, import validation, toast notifications)
+  - New `ExcelButtons` component in `client/src/components/excel-buttons.tsx`
