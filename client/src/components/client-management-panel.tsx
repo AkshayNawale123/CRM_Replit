@@ -11,6 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -230,10 +231,15 @@ export function ClientManagementPanel({
               </Button>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <StageBadge stage={client.stage as any} />
             <StatusBadge status={client.status as any} />
             <PriorityBadge priority={client.priority as any} />
+            {client.service && (
+              <Badge variant="outline" className="bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700">
+                {client.service}
+              </Badge>
+            )}
           </div>
         </div>
 
