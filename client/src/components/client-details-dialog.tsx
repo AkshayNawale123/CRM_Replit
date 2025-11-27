@@ -100,23 +100,17 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
             <DialogTitle className="text-xl font-semibold">
               {client.companyName}
             </DialogTitle>
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col items-end">
-                <span className="text-xs text-muted-foreground mb-0.5">Priority</span>
-                <PriorityBadge priority={client.priority as any} />
-              </div>
-              {onEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onEdit}
-                  className="gap-1 h-8 px-2 text-xs"
-                >
-                  <Edit className="h-3 w-3" />
-                  Edit
-                </Button>
-              )}
-            </div>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="gap-1 h-8 px-2 text-xs"
+              >
+                <Edit className="h-3 w-3" />
+                Edit
+              </Button>
+            )}
           </div>
         </DialogHeader>
 
