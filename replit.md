@@ -104,7 +104,22 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### November 27, 2025
+- **Country-based Currency System**: Implemented comprehensive currency handling
+  - Added searchable country dropdown with 50+ countries and their currencies
+  - Auto-selects currency based on country (e.g., United States → USD, India → INR)
+  - Value displays use country-specific currency symbols ($, £, €, ¥, etc.)
+  - Exchange rates stored in `client/src/lib/country-currency-data.ts`
+
+- **Value (in INR) Column in Reports**: Added INR conversion column
+  - Displays all deal values converted to Indian Rupees for standardized reporting
+  - Sortable column for comparing deals across different currencies
+  - Conversion uses stored exchange rates from country-currency data
+
 - **Days in Pipeline Calculation**: Updated to use `pipelineStartDate` field
   - For Excel imports: Uses the "Last Follow-up" date as the pipeline start date
   - For manual "Add Client": Uses the creation date (today's date)
   - This allows imported clients to show accurate pipeline duration based on when they actually entered the pipeline, not when they were imported into the system
+
+- **Excel Template Updates**: Enhanced instructions for currency handling
+  - Country field must match supported country names exactly
+  - Value stored in local currency (currency auto-detected from country)
