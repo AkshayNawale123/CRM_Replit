@@ -41,6 +41,8 @@ import {
   MapPin,
   User,
 } from "lucide-react";
+import { CountrySelect } from "./country-select";
+import { getCurrencyByCountry, formatCurrencyByCountry } from "@/lib/country-currency-data";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -605,7 +607,11 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Country</FormLabel>
                         <FormControl>
-                          <Input placeholder="United States" {...field} />
+                          <CountrySelect
+                            value={field.value}
+                            onChange={(value) => field.onChange(value)}
+                            data-testid="input-country"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
+import { CountrySelect } from "./country-select";
+import { getCurrencyByCountry } from "@/lib/country-currency-data";
 
 interface ClientDialogProps {
   open: boolean;
@@ -320,9 +322,9 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                     <FormItem>
                       <FormLabel>Country</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="United States" 
-                          {...field} 
+                        <CountrySelect
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
                           data-testid="input-country"
                         />
                       </FormControl>
