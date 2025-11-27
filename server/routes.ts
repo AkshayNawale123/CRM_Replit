@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertClientSchema, addActivitySchema } from "@shared/schema";
+import { generateExcelTemplate, parseExcelFile } from "./excel-utils";
+import multer from "multer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients", async (_req, res) => {
@@ -91,6 +93,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(client);
     } catch (error) {
       res.status(500).json({ error: "Failed to delete activity" });
+    }
+  });
+
+  // Excel import/export endpoints
+  app.get("/api/clients/export/template", (_req, res) => {
+    try {
+      const buffer = generateExcelTemplate();
+      res.set({
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": 'attachment; filename="CRM_Import_Template.xlsx"',
+      });
+      res.send(buffer);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate template" });
+    }
+  });
+
+  const upload = multer({ storage: multer.memoryStorage() });
+
+  app.post("/api/clients/import", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file provided" });
+      }
+
+      const clients = parseExcelFile(req.file.buffer);
+      const createdClients = [];
+      const errors = [];
+
+      for (let i = 0; i < clients.length; i++) {
+        try {
+          const validatedData = insertClientSchema.parse(clients[i]);
+          const createdClient = await storage.createClient(validatedData);
+          createdClients.push(createdClient);
+        } catch (error) {
+          errors.push({
+            row: i + 2,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        imported: createdClients.length,
+        total: clients.length,
+        errors,
+        clients: createdClients,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to import clients" });
     }
   });
 
