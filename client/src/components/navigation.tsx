@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, FileText, BookOpen, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, BookOpen, LogOut, BarChart3 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 export function Navigation() {
@@ -30,6 +30,17 @@ export function Navigation() {
           >
             <FileText className="h-4 w-4" />
             Reports
+          </Button>
+        </Link>
+        <Link href="/analytics">
+          <Button
+            variant={location === "/analytics" ? "default" : "ghost"}
+            size="sm"
+            className="gap-2"
+            data-testid="nav-analytics"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Analytics
           </Button>
         </Link>
         <Link href="/glossary">

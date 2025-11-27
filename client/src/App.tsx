@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import Dashboard from "@/pages/dashboard";
 import Reports from "@/pages/reports";
+import Analytics from "@/pages/analytics";
 import Glossary from "@/pages/glossary";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
@@ -15,6 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/reports" component={Reports} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/glossary" component={Glossary} />
       <Route component={NotFound} />
     </Switch>
