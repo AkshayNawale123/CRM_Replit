@@ -370,16 +370,6 @@ export function ClientManagementPanel({
                 </div>
               )}
 
-              {/* Add Note button */}
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => onChangeMode("edit")}
-                data-testid="button-add-note"
-              >
-                Add Note
-              </Button>
-
               {/* Activity History */}
               {client.activityHistory && client.activityHistory.length > 0 && (
                 <div className="space-y-2 mt-4">
