@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,7 +9,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,10 +39,16 @@ import {
   Calendar,
   MapPin,
   User,
+  Globe,
+  CalendarPlus,
+  Send,
+  RefreshCw,
+  FileText,
+  Briefcase,
 } from "lucide-react";
 import { CountrySelect } from "./country-select";
 import { ServiceSelect } from "./service-select";
-import { getCurrencyByCountry, formatCurrencyByCountry } from "@/lib/country-currency-data";
+import { formatCurrencyByCountry } from "@/lib/country-currency-data";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -163,7 +167,7 @@ export function ClientManagementPanel({
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === "string" ? new Date(date) : date;
-    return format(dateObj, "MM/dd/yyyy");
+    return format(dateObj, "yyyy-MM-dd");
   };
 
   if (!client && mode === "view") {
@@ -177,7 +181,9 @@ export function ClientManagementPanel({
           }}
         />
         <div className="relative z-10 text-center p-8 max-w-md bg-background/80 backdrop-blur-sm rounded-lg shadow-lg">
-          <div className="mb-4 text-4xl">👋</div>
+          <div className="mb-4">
+            <Briefcase className="h-12 w-12 mx-auto text-muted-foreground" />
+          </div>
           <h3 className="text-lg font-semibold mb-2">
             Welcome to Client Management
           </h3>
@@ -200,199 +206,286 @@ export function ClientManagementPanel({
 
   if (mode === "view" && client) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="p-6 border-b bg-background">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-semibold">{client.companyName}</h2>
-              <p className="text-muted-foreground">{client.contactPerson}</p>
+      <div className="flex flex-col h-full bg-background">
+        {/* Header */}
+        <div className="p-4 border-b bg-background">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold truncate" data-testid="text-client-name">
+                {client.companyName}
+              </h2>
+              <p className="text-sm text-muted-foreground">{client.contactPerson}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button
-                variant="outline"
-                size="sm"
+                variant="ghost"
+                size="icon"
                 onClick={() => onChangeMode("edit")}
-                className="gap-2"
+                data-testid="button-edit-client"
               >
                 <Edit className="h-4 w-4" />
-                Edit
               </Button>
-              <Button variant="ghost" size="icon" onClick={onCancel}>
+              <Button variant="ghost" size="icon" onClick={onCancel} data-testid="button-close-client">
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          <div className="flex gap-3 flex-wrap">
+          {/* Badge row */}
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
             <StageBadge stage={client.stage as any} />
-            <StatusBadge status={client.status as any} />
             <PriorityBadge priority={client.priority as any} />
             {client.service && (
-              <Badge variant="outline" className="bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700">
+              <Badge 
+                variant="outline" 
+                className="bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700"
+              >
                 {client.service}
               </Badge>
             )}
+            <StatusBadge status={client.status as any} />
           </div>
         </div>
 
+        {/* Content */}
         <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <div className="p-4 space-y-6">
+            {/* Two-column layout for Contact & Deal Information */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm flex items-center gap-2 text-muted-foreground">
                   <User className="h-4 w-4" />
                   Contact Information
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <Mail className="h-3 w-3" />
-                      Email
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Email</div>
+                      <a
+                        href={`mailto:${client.email}`}
+                        className="text-sm font-medium text-blue-600 hover:underline break-all"
+                        data-testid="link-email"
+                      >
+                        {client.email}
+                      </a>
                     </div>
-                    <a
-                      href={`mailto:${client.email}`}
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      {client.email}
-                    </a>
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <Phone className="h-3 w-3" />
-                      Phone
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Phone</div>
+                      <div className="text-sm font-medium">{client.phone}</div>
                     </div>
-                    <div className="text-sm font-medium">{client.phone}</div>
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <MapPin className="h-3 w-3" />
-                      Country
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Country</div>
+                      <div className="text-sm font-medium">{client.country}</div>
                     </div>
-                    <div className="text-sm font-medium">{client.country}</div>
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <User className="h-3 w-3" />
-                      Responsible Person
-                    </div>
-                    <div className="text-sm font-medium">
-                      {client.responsiblePerson}
+                  <div className="flex items-start gap-3">
+                    <User className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Responsible Person</div>
+                      <div className="text-sm font-medium">{client.responsiblePerson}</div>
                     </div>
                   </div>
                   {client.linkedin && (
-                    <div className="col-span-2">
-                      <div className="text-sm text-muted-foreground mb-1">
-                        LinkedIn
+                    <div className="flex items-start gap-3">
+                      <Globe className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-xs text-muted-foreground">LinkedIn</div>
+                        <a
+                          href={client.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-blue-600 hover:underline break-all"
+                        >
+                          {client.linkedin}
+                        </a>
                       </div>
-                      <a
-                        href={client.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-blue-600 hover:underline"
-                      >
-                        {client.linkedin}
-                      </a>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-4">Deal Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">
-                      Deal Value
-                    </div>
-                    <div className="text-2xl font-bold">
-                      {formatCurrencyByCountry(client.value, client.country)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <Calendar className="h-3 w-3" />
-                      Last Follow-up
-                    </div>
-                    <div className="text-lg font-semibold">
-                      {formatDate(client.lastFollowUp)}
+              {/* Deal Information */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm flex items-center gap-2 text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                  Deal Information
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-4 w-4 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Deal Value</div>
+                      <div className="text-xl font-bold" data-testid="text-deal-value">
+                        {formatCurrencyByCountry(client.value, client.country)}
+                      </div>
                     </div>
                   </div>
-                  <div className="col-span-2">
-                    <div className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
-                      <Calendar className="h-3 w-3" />
-                      Next Follow-up
+                  <div className="flex items-start gap-3">
+                    <div className="h-4 w-4 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Stage</div>
+                      <div className="text-sm font-medium">{client.stage}</div>
                     </div>
-                    <div className="text-lg font-semibold">
-                      {formatDate(client.nextFollowUp)}
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Last Follow-up</div>
+                      <div className="text-sm font-medium">{formatDate(client.lastFollowUp)}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Next Follow-up</div>
+                      <div className="text-sm font-medium">{formatDate(client.nextFollowUp)}</div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {client.notes && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-2">Notes</h3>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {client.notes}
+            {/* Notes & Activities Section */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2 text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                Notes & Activities
+              </h3>
+              
+              {/* Notes */}
+              {client.notes ? (
+                <div className="bg-muted/30 rounded-md p-3">
+                  <p className="text-sm whitespace-pre-wrap">{client.notes}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Last updated: {formatDate(client.lastFollowUp)}
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              ) : (
+                <div className="bg-muted/30 rounded-md p-3 text-sm text-muted-foreground">
+                  No notes yet
+                </div>
+              )}
 
-            {client.activityHistory && client.activityHistory.length > 0 && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-4">Activity History</h3>
-                  <div className="space-y-3">
-                    {client.activityHistory.map((activity) => (
+              {/* Add Note button */}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => onChangeMode("edit")}
+                data-testid="button-add-note"
+              >
+                Add Note
+              </Button>
+
+              {/* Activity History */}
+              {client.activityHistory && client.activityHistory.length > 0 && (
+                <div className="space-y-2 mt-4">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Recent Activity
+                  </h4>
+                  <div className="space-y-2">
+                    {client.activityHistory.slice(0, 5).map((activity) => (
                       <div
                         key={activity.id}
-                        className="flex items-start gap-3 pb-3 border-b last:border-0"
+                        className="flex items-start gap-3 text-sm"
                       >
-                        <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                        <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">
-                            {activity.action}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            by {activity.user}
-                          </div>
+                          <span className="font-medium">{activity.action}</span>
+                          <span className="text-muted-foreground"> by {activity.user}</span>
                         </div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {activity.date}
-                        </div>
+                        </span>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {onDelete && (
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                className="w-full gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Client
-              </Button>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </ScrollArea>
+
+        {/* Action Bar */}
+        <div className="p-4 border-t bg-background space-y-2">
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 gap-2"
+              onClick={() => onChangeMode("edit")}
+              data-testid="button-schedule-followup"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Schedule Follow-up
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => window.location.href = `mailto:${client.email}`}
+              data-testid="button-send-email"
+            >
+              <Send className="h-4 w-4" />
+              Send Email
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => onChangeMode("edit")}
+              data-testid="button-update-status"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Update Status
+            </Button>
+          </div>
+          {onDelete && (
+            <Button
+              variant="ghost"
+              className="w-full gap-2 text-destructive hover:text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              data-testid="button-delete-client"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete Client
+            </Button>
+          )}
+        </div>
+
+        {/* Delete Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Client</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this client? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
 
+  // Create / Edit Mode
   return (
     <>
       <div className="flex flex-col h-full">
-        <div className="p-6 border-b bg-background">
+        <div className="p-4 border-b bg-background">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-lg font-semibold">
               {mode === "create" ? "Add New Client" : "Edit Client"}
             </h2>
             <Button variant="ghost" size="icon" onClick={onCancel}>
@@ -402,11 +495,11 @@ export function ClientManagementPanel({
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="p-6">
+          <div className="p-4">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-6"
+                className="space-y-4"
               >
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -416,7 +509,7 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Company Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Acme Corporation" {...field} />
+                          <Input placeholder="Acme Corporation" {...field} data-testid="input-company-name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -430,7 +523,7 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Contact Person</FormLabel>
                         <FormControl>
-                          <Input placeholder="John Smith" {...field} />
+                          <Input placeholder="John Smith" {...field} data-testid="input-contact-person" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -450,6 +543,7 @@ export function ClientManagementPanel({
                             type="email"
                             placeholder="john@acme.com"
                             {...field}
+                            data-testid="input-email"
                           />
                         </FormControl>
                         <FormMessage />
@@ -468,6 +562,7 @@ export function ClientManagementPanel({
                             type="tel"
                             placeholder="+1 234-567-8900"
                             {...field}
+                            data-testid="input-phone"
                           />
                         </FormControl>
                         <FormMessage />
@@ -488,7 +583,7 @@ export function ClientManagementPanel({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger data-testid="select-stage">
                               <SelectValue placeholder="Select stage" />
                             </SelectTrigger>
                           </FormControl>
@@ -516,7 +611,7 @@ export function ClientManagementPanel({
                           value={field.value ?? "__none__"}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger data-testid="select-status">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
@@ -547,7 +642,7 @@ export function ClientManagementPanel({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger data-testid="select-priority">
                               <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                           </FormControl>
@@ -565,42 +660,7 @@ export function ClientManagementPanel({
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Deal Value (Currency as per Country)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="250000"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="responsiblePerson"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Responsible Person</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Sarah Johnson" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="country"
@@ -618,25 +678,63 @@ export function ClientManagementPanel({
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Deal Value (Currency as per Country)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="250000"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                            data-testid="input-value"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="service"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service Interested In</FormLabel>
-                      <FormControl>
-                        <ServiceSelect
-                          value={field.value || ""}
-                          onChange={(value) => field.onChange(value)}
-                          data-testid="input-service"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="responsiblePerson"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Responsible Person</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Sarah Johnson" {...field} data-testid="input-responsible-person" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="service"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Interested In</FormLabel>
+                        <FormControl>
+                          <ServiceSelect
+                            value={field.value || ""}
+                            onChange={(value) => field.onChange(value)}
+                            data-testid="input-service"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -652,6 +750,7 @@ export function ClientManagementPanel({
                             value={
                               typeof field.value === "string" ? field.value : ""
                             }
+                            data-testid="input-last-followup"
                           />
                         </FormControl>
                         <FormMessage />
@@ -672,6 +771,7 @@ export function ClientManagementPanel({
                             value={
                               typeof field.value === "string" ? field.value : ""
                             }
+                            data-testid="input-next-followup"
                           />
                         </FormControl>
                         <FormMessage />
@@ -691,6 +791,7 @@ export function ClientManagementPanel({
                           type="url"
                           placeholder="https://www.linkedin.com/in/profile"
                           {...field}
+                          data-testid="input-linkedin"
                         />
                       </FormControl>
                       <FormMessage />
@@ -707,8 +808,9 @@ export function ClientManagementPanel({
                       <FormControl>
                         <Textarea
                           placeholder="Add notes about this client..."
-                          rows={4}
+                          rows={3}
                           {...field}
+                          data-testid="input-notes"
                         />
                       </FormControl>
                       <FormMessage />
@@ -722,10 +824,11 @@ export function ClientManagementPanel({
                     variant="outline"
                     onClick={onCancel}
                     className="flex-1"
+                    data-testid="button-cancel"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isLoading} className="flex-1">
+                  <Button type="submit" disabled={isLoading} className="flex-1" data-testid="button-submit">
                     {isLoading
                       ? "Saving..."
                       : mode === "create"
@@ -733,6 +836,19 @@ export function ClientManagementPanel({
                         : "Save Changes"}
                   </Button>
                 </div>
+
+                {mode === "edit" && onDelete && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="w-full gap-2"
+                    data-testid="button-delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Client
+                  </Button>
+                )}
               </form>
             </Form>
           </div>
