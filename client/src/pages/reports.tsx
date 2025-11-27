@@ -6,7 +6,7 @@ import type { Client } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClientTable } from "@/components/client-table";
-import { ClientDetailsDialog } from "@/components/client-details-dialog";
+import { ClientDetailPanel } from "@/components/client-detail-panel";
 import { useState, useMemo, useEffect } from "react";
 import { convertToINR } from "@/lib/country-currency-data";
 import {
@@ -25,8 +25,8 @@ type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'la
 type SortOrder = 'asc' | 'desc';
 
 export default function Reports() {
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | undefined>();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -35,9 +35,13 @@ export default function Reports() {
     queryKey: ["/api/clients"],
   });
 
-  const handleViewDetails = (client: Client) => {
+  const handleRowClick = (client: Client) => {
     setSelectedClient(client);
-    setDetailsDialogOpen(true);
+    setIsPanelOpen(true);
+  };
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
   };
 
   const totalClients = clients.length;
@@ -179,18 +183,23 @@ export default function Reports() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="mx-auto px-4 py-3">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              Client Reports
-            </h1>
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              High-level view of all client relationships and project stages
-            </p>
+      <div 
+        className={`transition-all duration-300 ease-in-out ${
+          isPanelOpen ? 'mr-[400px]' : 'mr-0'
+        }`}
+      >
+        <div className="sticky top-0 z-10 bg-background border-b border-border">
+          <div className="mx-auto px-4 py-3">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">
+                Client Reports
+              </h1>
+              <p className="text-muted-foreground mt-0.5 text-sm">
+                High-level view of all client relationships and project stages
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="mx-auto px-4 py-3 space-y-3">
         {isLoading ? (
@@ -271,7 +280,8 @@ export default function Reports() {
             <>
               <ClientTable 
                 clients={paginatedClients} 
-                onEditClient={handleViewDetails}
+                onRowClick={handleRowClick}
+                selectedClientId={selectedClient?.id}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 onSort={handleSort}
@@ -329,11 +339,12 @@ export default function Reports() {
           )}
         </div>
       </div>
+      </div>
 
-      <ClientDetailsDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
-        client={selectedClient || null}
+      <ClientDetailPanel
+        client={selectedClient}
+        isOpen={isPanelOpen}
+        onClose={handleClosePanel}
       />
     </div>
   );

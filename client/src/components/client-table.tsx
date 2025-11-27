@@ -1,9 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
-import { ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
 import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
@@ -13,13 +12,14 @@ type SortOrder = 'asc' | 'desc';
 
 interface ClientTableProps {
   clients: Client[];
-  onEditClient: (client: Client) => void;
+  onRowClick: (client: Client) => void;
+  selectedClientId?: string;
   sortField?: SortField;
   sortOrder?: SortOrder;
   onSort?: (field: SortField) => void;
 }
 
-export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSort }: ClientTableProps) {
+export function ClientTable({ clients, onRowClick, selectedClientId, sortField, sortOrder, onSort }: ClientTableProps) {
   const formatValueByCountry = (value: number, country: string) => {
     return formatCurrencyByCountry(value, country);
   };
@@ -107,22 +107,27 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
               <SortableHeader field="service">Service</SortableHeader>
               <SortableHeader field="priority">Priority</SortableHeader>
               <SortableHeader field="createdAt" align="center">Days in Pipeline</SortableHeader>
-              <TableHead className="font-semibold py-2 px-3 text-xs text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   No clients found. Add your first client to get started.
                 </TableCell>
               </TableRow>
             ) : (
               clients.map((client) => {
+                const isSelected = selectedClientId === client.id;
                 return (
                   <TableRow 
                     key={client.id} 
-                    className="hover-elevate"
+                    onClick={() => onRowClick(client)}
+                    className={`cursor-pointer transition-colors duration-150 ${
+                      isSelected 
+                        ? 'bg-blue-50 dark:bg-blue-950/30' 
+                        : 'hover:bg-blue-50 dark:hover:bg-blue-950/20'
+                    }`}
                     data-testid={`row-client-${client.id}`}
                   >
                     <TableCell className="py-2 px-3">
@@ -164,18 +169,6 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
                     </TableCell>
                     <TableCell className="py-2 px-3 text-center font-semibold text-foreground text-sm" data-testid={`text-days-pipeline-${client.id}`}>
                       {getDaysInPipeline(client.pipelineStartDate, client.createdAt)} days
-                    </TableCell>
-                    <TableCell className="py-2 px-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditClient(client)}
-                        className="gap-1 h-7 px-2 text-xs"
-                        data-testid={`button-details-${client.id}`}
-                      >
-                        Details
-                        <ChevronRight className="h-3 w-3" />
-                      </Button>
                     </TableCell>
                   </TableRow>
                 );
