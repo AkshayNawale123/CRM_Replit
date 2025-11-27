@@ -118,13 +118,17 @@ export function generateExcelTemplate(): Buffer {
     ['Priority Options (Required):'],
     ['High, Medium, Low'],
     [''],
+    ['Country Options (Required - must match exactly):'],
+    ['United States, United Kingdom, India, Canada, Australia, Germany, France, Japan, China, Singapore, United Arab Emirates, Saudi Arabia, Netherlands, Switzerland, Sweden, Brazil, Mexico, South Korea, etc.'],
+    [''],
     ['Date Format: YYYY-MM-DD (e.g., 2025-11-20)'],
-    ['Value: Numeric amount without currency symbols (e.g., 100000)'],
+    ['Value: Numeric amount in the local currency of the selected country (e.g., 100000). Currency is auto-detected based on country.'],
     [''],
     ['Notes:'],
     ['- Delete the sample row before importing your data'],
     ['- All fields except Status, LinkedIn, and Notes are required'],
     ['- Email must be valid format'],
+    ['- Country name must match exactly for currency detection'],
   ];
   
   const infoWs = XLSX.utils.aoa_to_sheet(instructionData);
