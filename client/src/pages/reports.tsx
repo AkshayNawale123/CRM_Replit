@@ -9,6 +9,7 @@ import { ClientTable } from "@/components/client-table";
 import { ClientDetailsDialog } from "@/components/client-details-dialog";
 import { ExcelImportExport } from "@/components/excel-import-export";
 import { useState, useMemo, useEffect } from "react";
+import { convertToINR } from "@/lib/country-currency-data";
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +22,7 @@ import {
 
 const ITEMS_PER_PAGE = 10;
 
-type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 export default function Reports() {
@@ -59,8 +60,17 @@ export default function Reports() {
 
   const sortedClients = useMemo(() => {
     const sorted = [...clients].sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let aValue: any;
+      let bValue: any;
+      
+      // Handle valueINR sorting separately (convert based on country)
+      if (sortField === 'valueINR') {
+        aValue = convertToINR(a.value, a.country);
+        bValue = convertToINR(b.value, b.country);
+      } else {
+        aValue = a[sortField as keyof Client];
+        bValue = b[sortField as keyof Client];
+      }
 
       // Handle null/undefined values symmetrically
       const aIsNull = aValue === null || aValue === undefined;

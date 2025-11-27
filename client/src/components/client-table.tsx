@@ -6,8 +6,9 @@ import { PriorityBadge } from "./priority-badge";
 import { ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
+import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
 
-type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 interface ClientTableProps {
@@ -19,13 +20,13 @@ interface ClientTableProps {
 }
 
 export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSort }: ClientTableProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  const formatValueByCountry = (value: number, country: string) => {
+    return formatCurrencyByCountry(value, country);
+  };
+
+  const formatValueINR = (value: number, country: string) => {
+    const inrValue = convertToINR(value, country);
+    return formatINR(inrValue);
   };
 
   const formatDate = (date: Date | string) => {
@@ -99,6 +100,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
               <SortableHeader field="stage">Stage</SortableHeader>
               <SortableHeader field="status">Status</SortableHeader>
               <SortableHeader field="value" align="right">Value</SortableHeader>
+              <SortableHeader field="valueINR" align="right">Value (in INR)</SortableHeader>
               <SortableHeader field="lastFollowUp">Last Follow-up</SortableHeader>
               <SortableHeader field="responsiblePerson">Responsible Person</SortableHeader>
               <SortableHeader field="country">Country</SortableHeader>
@@ -110,7 +112,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   No clients found. Add your first client to get started.
                 </TableCell>
               </TableRow>
@@ -139,7 +141,10 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
                       <StatusBadge status={client.status as any} />
                     </TableCell>
                     <TableCell className="py-2 px-3 text-right font-semibold text-sm" data-testid={`text-value-${client.id}`}>
-                      {formatCurrency(client.value)}
+                      {formatValueByCountry(client.value, client.country)}
+                    </TableCell>
+                    <TableCell className="py-2 px-3 text-right font-semibold text-sm text-muted-foreground" data-testid={`text-value-inr-${client.id}`}>
+                      {formatValueINR(client.value, client.country)}
                     </TableCell>
                     <TableCell className="py-2 px-3 text-muted-foreground text-sm" data-testid={`text-last-followup-${client.id}`}>
                       {formatDate(client.lastFollowUp)}
