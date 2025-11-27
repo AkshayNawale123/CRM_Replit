@@ -42,6 +42,7 @@ import {
   User,
 } from "lucide-react";
 import { CountrySelect } from "./country-select";
+import { ServiceSelect } from "./service-select";
 import { getCurrencyByCountry, formatCurrencyByCountry } from "@/lib/country-currency-data";
 import {
   AlertDialog,
@@ -98,6 +99,7 @@ export function ClientManagementPanel({
       priority: "Medium" as const,
       responsiblePerson: "",
       country: "",
+      service: "",
       linkedin: "",
       notes: "",
     },
@@ -118,6 +120,7 @@ export function ClientManagementPanel({
         priority: client.priority as ClientFormData["priority"],
         responsiblePerson: client.responsiblePerson,
         country: client.country,
+        service: client.service || "",
         linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
@@ -138,6 +141,7 @@ export function ClientManagementPanel({
         priority: "Medium",
         responsiblePerson: "",
         country: "",
+        service: "",
         linkedin: "",
         notes: "",
       });
@@ -618,6 +622,24 @@ export function ClientManagementPanel({
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="service"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Service Interested In</FormLabel>
+                      <FormControl>
+                        <ServiceSelect
+                          value={field.value || ""}
+                          onChange={(value) => field.onChange(value)}
+                          data-testid="input-service"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
