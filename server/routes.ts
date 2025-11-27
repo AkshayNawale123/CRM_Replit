@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertClientSchema, addActivitySchema } from "@shared/schema";
+import { insertClientSchema, addActivitySchema, insertServiceSchema } from "@shared/schema";
 import { generateExcelTemplate, parseExcelFile, validateExcelFile } from "./excel-utils";
 import multer from "multer";
 
@@ -10,6 +10,36 @@ interface MulterRequest extends Request {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Service endpoints
+  app.get("/api/services", async (_req, res) => {
+    try {
+      const services = await storage.getAllServices();
+      res.json(services);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch services" });
+    }
+  });
+
+  app.post("/api/services", async (req, res) => {
+    try {
+      const validatedData = insertServiceSchema.parse(req.body);
+      
+      // Check if service already exists
+      const existing = await storage.getServiceByName(validatedData.name);
+      if (existing) {
+        return res.status(409).json({ error: "Service already exists", service: existing });
+      }
+      
+      const service = await storage.createService(validatedData);
+      res.status(201).json(service);
+    } catch (error) {
+      if (error instanceof Error && error.name === "ZodError") {
+        return res.status(400).json({ error: "Invalid service data", details: error });
+      }
+      res.status(500).json({ error: "Failed to create service" });
+    }
+  });
+
   app.get("/api/clients", async (_req, res) => {
     try {
       const clients = await storage.getAllClients();
@@ -187,6 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             priority: client.priority,
             responsiblePerson: client.responsiblePerson,
             country: client.country,
+            service: client.service || "Product Development",
             linkedin: client.linkedin,
             notes: client.notes,
             lastFollowUp: client.lastFollowUp,

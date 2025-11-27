@@ -1,4 +1,4 @@
-import { type Client, type InsertClient, clients, users, activities } from "@shared/schema";
+import { type Client, type InsertClient, type Service, type InsertService, clients, users, activities, services, defaultServices } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { eq, sql } from "drizzle-orm";
@@ -12,6 +12,9 @@ export interface IStorage {
   deleteClient(id: string): Promise<boolean>;
   addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined>;
   deleteActivity(clientId: string, activityId: string): Promise<Client | undefined>;
+  getAllServices(): Promise<Service[]>;
+  createService(service: InsertService): Promise<Service>;
+  getServiceByName(name: string): Promise<Service | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -39,6 +42,17 @@ export class DbStorage implements IStorage {
       responsiblePerson = userResult[0]?.name || "";
     }
 
+    // Get service name
+    let serviceName = "";
+    if (client.serviceId) {
+      const serviceResult = await this.db
+        .select({ name: services.name })
+        .from(services)
+        .where(eq(services.id, client.serviceId))
+        .limit(1);
+      serviceName = serviceResult[0]?.name || "";
+    }
+
     // Get activities with user names in a single JOIN query
     const activitiesWithUsers = await this.db
       .select({
@@ -63,6 +77,7 @@ export class DbStorage implements IStorage {
       ...client,
       value: parseFloat(client.value),
       responsiblePerson,
+      service: serviceName,
       activityHistory,
     };
   }
@@ -81,7 +96,9 @@ export class DbStorage implements IStorage {
   async createClient(insertClient: InsertClient): Promise<Client> {
     // Get or create user for responsible person
     const responsiblePerson = (insertClient as any).responsiblePerson;
+    const serviceName = (insertClient as any).service;
     let userId: string | undefined;
+    let serviceId: string | undefined;
     
     if (responsiblePerson) {
       const existingUser = await this.db
@@ -100,9 +117,28 @@ export class DbStorage implements IStorage {
       }
     }
 
+    // Get or create service
+    if (serviceName) {
+      const existingService = await this.db
+        .select()
+        .from(services)
+        .where(eq(services.name, serviceName));
+      
+      if (existingService[0]) {
+        serviceId = existingService[0].id;
+      } else {
+        const newService = await this.db
+          .insert(services)
+          .values({ name: serviceName })
+          .returning();
+        serviceId = newService[0].id;
+      }
+    }
+
     const clientData = {
       ...insertClient,
       responsiblePersonId: userId,
+      serviceId: serviceId,
     };
 
     const result = await this.db.insert(clients).values(clientData).returning();
@@ -116,7 +152,9 @@ export class DbStorage implements IStorage {
 
     // Get or create user for responsible person
     const responsiblePerson = (insertClient as any).responsiblePerson;
+    const serviceName = (insertClient as any).service;
     let userId: string | undefined;
+    let serviceId: string | undefined;
     
     if (responsiblePerson) {
       const existingUser = await this.db
@@ -135,9 +173,28 @@ export class DbStorage implements IStorage {
       }
     }
 
+    // Get or create service
+    if (serviceName) {
+      const existingService = await this.db
+        .select()
+        .from(services)
+        .where(eq(services.name, serviceName));
+      
+      if (existingService[0]) {
+        serviceId = existingService[0].id;
+      } else {
+        const newService = await this.db
+          .insert(services)
+          .values({ name: serviceName })
+          .returning();
+        serviceId = newService[0].id;
+      }
+    }
+
     const clientData = {
       ...insertClient,
       responsiblePersonId: userId,
+      serviceId: serviceId,
       updatedAt: new Date(),
     };
 
@@ -197,17 +254,52 @@ export class DbStorage implements IStorage {
     
     return this.getClient(clientId);
   }
+
+  async getAllServices(): Promise<Service[]> {
+    const result = await this.db.select().from(services).orderBy(services.name);
+    return result;
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const result = await this.db.insert(services).values(insertService).returning();
+    return result[0];
+  }
+
+  async getServiceByName(name: string): Promise<Service | undefined> {
+    const result = await this.db
+      .select()
+      .from(services)
+      .where(eq(services.name, name))
+      .limit(1);
+    return result[0];
+  }
 }
 
 export class MemStorage implements IStorage {
   private clients: Map<string, Client>;
+  private servicesList: Map<string, Service>;
 
   constructor() {
     this.clients = new Map();
+    this.servicesList = new Map();
+    this.seedServices();
     this.seedData();
   }
 
+  private seedServices() {
+    defaultServices.forEach((name) => {
+      const id = randomUUID();
+      this.servicesList.set(id, {
+        id,
+        name,
+        isActive: "true",
+        createdAt: new Date(),
+      });
+    });
+  }
+
   private seedData() {
+    const serviceArray = Array.from(this.servicesList.values());
     const sampleClients: Omit<Client, "id">[] = [
       {
         companyName: "Acme Corporation",
@@ -222,6 +314,8 @@ export class MemStorage implements IStorage {
         priority: "High",
         responsiblePerson: "Sarah Johnson",
         responsiblePersonId: null,
+        service: "CRM",
+        serviceId: serviceArray.find(s => s.name === "CRM")?.id || null,
         country: "United States",
         linkedin: "https://www.linkedin.com/in/johnsmith",
         notes: "Interested in enterprise package. Decision maker meeting scheduled.",
@@ -589,6 +683,22 @@ export class MemStorage implements IStorage {
   async createClient(insertClient: InsertClient & { pipelineStartDate?: Date }): Promise<Client> {
     const id = randomUUID();
     const now = new Date();
+    const serviceName = (insertClient as any).service;
+    
+    // Get or create service
+    let serviceId: string | null = null;
+    if (serviceName) {
+      const existingService = Array.from(this.servicesList.values()).find(s => s.name === serviceName);
+      if (existingService) {
+        serviceId = existingService.id;
+      } else {
+        const newId = randomUUID();
+        const newService: Service = { id: newId, name: serviceName, isActive: "true", createdAt: new Date() };
+        this.servicesList.set(newId, newService);
+        serviceId = newId;
+      }
+    }
+    
     const client: Client = {
       ...insertClient,
       id,
@@ -596,6 +706,8 @@ export class MemStorage implements IStorage {
       status: insertClient.status,
       linkedin: insertClient.linkedin || "",
       notes: insertClient.notes || "",
+      service: serviceName || "",
+      serviceId: serviceId,
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
@@ -618,6 +730,22 @@ export class MemStorage implements IStorage {
       return undefined;
     }
 
+    const serviceName = (insertClient as any).service;
+    
+    // Get or create service
+    let serviceId: string | null = existing.serviceId || null;
+    if (serviceName) {
+      const existingService = Array.from(this.servicesList.values()).find(s => s.name === serviceName);
+      if (existingService) {
+        serviceId = existingService.id;
+      } else {
+        const newId = randomUUID();
+        const newService: Service = { id: newId, name: serviceName, isActive: "true", createdAt: new Date() };
+        this.servicesList.set(newId, newService);
+        serviceId = newId;
+      }
+    }
+
     const updated: Client = {
       ...insertClient,
       id,
@@ -625,6 +753,8 @@ export class MemStorage implements IStorage {
       status: insertClient.status,
       linkedin: insertClient.linkedin || "",
       notes: insertClient.notes || "",
+      service: serviceName || existing.service || "",
+      serviceId: serviceId,
       activityHistory: insertClient.activityHistory || [],
       lastFollowUp: insertClient.lastFollowUp as Date,
       nextFollowUp: insertClient.nextFollowUp as Date,
@@ -680,6 +810,26 @@ export class MemStorage implements IStorage {
 
     this.clients.set(clientId, updatedClient);
     return updatedClient;
+  }
+
+  async getAllServices(): Promise<Service[]> {
+    return Array.from(this.servicesList.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const id = randomUUID();
+    const service: Service = {
+      id,
+      name: insertService.name,
+      isActive: insertService.isActive || "true",
+      createdAt: new Date(),
+    };
+    this.servicesList.set(id, service);
+    return service;
+  }
+
+  async getServiceByName(name: string): Promise<Service | undefined> {
+    return Array.from(this.servicesList.values()).find(s => s.name === name);
   }
 }
 

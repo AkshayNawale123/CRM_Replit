@@ -13,6 +13,7 @@ import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
 import { CountrySelect } from "./country-select";
+import { ServiceSelect } from "./service-select";
 import { getCurrencyByCountry } from "@/lib/country-currency-data";
 
 interface ClientDialogProps {
@@ -42,6 +43,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       priority: "Medium" as const,
       responsiblePerson: "",
       country: "",
+      service: "",
       linkedin: "",
       notes: "",
     },
@@ -62,6 +64,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         priority: client.priority as ClientFormData["priority"],
         responsiblePerson: client.responsiblePerson,
         country: client.country,
+        service: client.service || "",
         linkedin: client.linkedin || "",
         notes: client.notes || "",
       });
@@ -79,6 +82,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         priority: "Medium",
         responsiblePerson: "",
         country: "",
+        service: "",
         linkedin: "",
         notes: "",
       });
@@ -333,6 +337,24 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="service"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service</FormLabel>
+                    <FormControl>
+                      <ServiceSelect
+                        value={field.value}
+                        onChange={(value) => field.onChange(value)}
+                        data-testid="select-service"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField

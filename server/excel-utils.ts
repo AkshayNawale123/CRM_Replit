@@ -11,6 +11,7 @@ export interface ExcelRow {
   'Priority': string;
   'Responsible Person': string;
   'Country': string;
+  'Service': string;
   'LinkedIn': string;
   'Notes': string;
   'Last Follow-up': string;
@@ -28,6 +29,7 @@ export interface ParsedClient {
   priority: string;
   responsiblePerson: string;
   country: string;
+  service: string;
   linkedin: string;
   notes: string;
   lastFollowUp: string;
@@ -49,6 +51,11 @@ const VALID_STATUSES = [
 
 const VALID_PRIORITIES = ['High', 'Medium', 'Low'];
 
+const VALID_SERVICES = [
+  'Product Development', 'CRM', 'ERP', 'Mobile Development',
+  'Website Creation', 'Digital Marketing', 'ITSM'
+];
+
 export function generateExcelTemplate(): Buffer {
   const headers: (keyof ExcelRow)[] = [
     'Company Name',
@@ -61,6 +68,7 @@ export function generateExcelTemplate(): Buffer {
     'Priority',
     'Responsible Person',
     'Country',
+    'Service',
     'LinkedIn',
     'Notes',
     'Last Follow-up',
@@ -78,6 +86,7 @@ export function generateExcelTemplate(): Buffer {
     'Priority': 'High',
     'Responsible Person': 'Sarah Johnson',
     'Country': 'United States',
+    'Service': 'CRM',
     'LinkedIn': 'https://linkedin.com/in/johndoe',
     'Notes': 'Initial contact',
     'Last Follow-up': '2025-11-20',
@@ -97,6 +106,7 @@ export function generateExcelTemplate(): Buffer {
     { wch: 12 },
     { wch: 18 },
     { wch: 15 },
+    { wch: 20 },
     { wch: 30 },
     { wch: 30 },
     { wch: 15 },
@@ -117,6 +127,10 @@ export function generateExcelTemplate(): Buffer {
     [''],
     ['Priority Options (Required):'],
     ['High, Medium, Low'],
+    [''],
+    ['Service Options (Required):'],
+    ['Product Development, CRM, ERP, Mobile Development, Website Creation, Digital Marketing, ITSM'],
+    ['Note: You can also use custom service names - they will be added to the system automatically'],
     [''],
     ['Country Options (Required - must match exactly):'],
     ['United States, United Kingdom, India, Canada, Australia, Germany, France, Japan, China, Singapore, United Arab Emirates, Saudi Arabia, Netherlands, Switzerland, Sweden, Brazil, Mexico, South Korea, etc.'],
@@ -176,6 +190,11 @@ function parseValue(value: number | string | undefined): number {
   return isNaN(num) ? 0 : Math.max(0, num);
 }
 
+function validateService(service: string | undefined): string {
+  if (!service || service.trim() === '') return 'Product Development';
+  return service.trim();
+}
+
 export function parseExcelFile(buffer: Buffer): ParsedClient[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -195,6 +214,7 @@ export function parseExcelFile(buffer: Buffer): ParsedClient[] {
     priority: validatePriority(row['Priority']?.toString()),
     responsiblePerson: row['Responsible Person']?.toString().trim() || 'Unassigned',
     country: row['Country']?.toString().trim() || '',
+    service: validateService(row['Service']?.toString()),
     linkedin: row['LinkedIn']?.toString().trim() || '',
     notes: row['Notes']?.toString().trim() || '',
     lastFollowUp: parseDate(row['Last Follow-up']?.toString(), now),

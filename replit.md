@@ -104,6 +104,18 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### November 27, 2025
+
+- **Service Tracking System**: Implemented comprehensive service tracking feature
+  - New `services` table in database to store available services
+  - Default services: Product Development, CRM, ERP, Mobile Development, Website Creation, Digital Marketing, ITSM
+  - ServiceSelect component with searchable dropdown and ability to add new services dynamically
+  - Service field added to Add/Edit Client form
+  - Service column added to Reports table (sortable)
+  - Service field displayed in Client Details dialog
+  - Excel import/export template updated to include Service column
+  - API endpoints: GET /api/services, POST /api/services
+  - Custom services can be added on-the-fly from the dropdown
+
 - **Country-based Currency System**: Implemented comprehensive currency handling
   - Added searchable country dropdown with 50+ countries and their currencies
   - Auto-selects currency based on country (e.g., United States → USD, India → INR)
@@ -123,6 +135,7 @@ Preferred communication style: Simple, everyday language.
 - **Excel Template Updates**: Enhanced instructions for currency handling
   - Country field must match supported country names exactly
   - Value stored in local currency (currency auto-detected from country)
+  - Service field added with default options and ability to add custom services
 
 - **Analytics Dashboard**: New comprehensive analytics page with 4 views
   - **Overview**: KPI cards (Active Pipeline, Win Rate, Avg Won Deal, Avg Cycle Time), Pipeline by Stage chart, Cycle Time Distribution, Priority Distribution pie chart, Action Items (high priority follow-ups, stalled negotiations, conversion opportunities)

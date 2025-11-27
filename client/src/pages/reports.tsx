@@ -21,7 +21,7 @@ import {
 
 const ITEMS_PER_PAGE = 10;
 
-type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'service' | 'priority' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 export default function Reports() {

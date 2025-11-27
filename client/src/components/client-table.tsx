@@ -8,7 +8,7 @@ import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
 import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
 
-type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'priority' | 'createdAt';
+type SortField = 'companyName' | 'stage' | 'status' | 'value' | 'valueINR' | 'lastFollowUp' | 'responsiblePerson' | 'country' | 'service' | 'priority' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
 
 interface ClientTableProps {
@@ -104,6 +104,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
               <SortableHeader field="lastFollowUp">Last Follow-up</SortableHeader>
               <SortableHeader field="responsiblePerson">Responsible Person</SortableHeader>
               <SortableHeader field="country">Country</SortableHeader>
+              <SortableHeader field="service">Service</SortableHeader>
               <SortableHeader field="priority">Priority</SortableHeader>
               <SortableHeader field="createdAt" align="center">Days in Pipeline</SortableHeader>
               <TableHead className="font-semibold py-2 px-3 text-xs text-right">Actions</TableHead>
@@ -112,7 +113,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
                   No clients found. Add your first client to get started.
                 </TableCell>
               </TableRow>
@@ -154,6 +155,9 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
                     </TableCell>
                     <TableCell className="py-2 px-3 text-muted-foreground text-sm" data-testid={`text-country-${client.id}`}>
                       {client.country}
+                    </TableCell>
+                    <TableCell className="py-2 px-3 text-muted-foreground text-sm" data-testid={`text-service-${client.id}`}>
+                      {client.service || '-'}
                     </TableCell>
                     <TableCell className="py-2 px-3">
                       <PriorityBadge priority={client.priority as any} />

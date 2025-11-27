@@ -213,6 +213,10 @@ export function ClientDetailsDialog({ open, onOpenChange, onEdit, client }: Clie
                   <div className="text-xs text-muted-foreground mb-0.5">Country</div>
                   <div className="text-base font-semibold">{client.country}</div>
                 </div>
+                <div>
+                  <div className="text-xs text-muted-foreground mb-0.5">Service</div>
+                  <div className="text-base font-semibold">{client.service || '-'}</div>
+                </div>
               </div>
             </div>
           </div>

@@ -4,6 +4,14 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+// Services table for dynamic service management
+export const services = pgTable("services", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  isActive: text("is_active").default("true"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // PostgreSQL ENUMs for better type safety
 export const stageEnum = pgEnum("stage", [
   "Lead",
@@ -53,6 +61,7 @@ export const clients = pgTable("clients", {
   nextFollowUp: timestamp("next_follow_up", { withTimezone: true }).notNull(),
   priority: priorityEnum("priority").notNull(),
   responsiblePersonId: varchar("responsible_person_id").references(() => users.id),
+  serviceId: varchar("service_id").references(() => services.id),
   country: text("country").notNull(),
   linkedin: text("linkedin").default(""),
   notes: text("notes").default(""),
@@ -66,6 +75,7 @@ export const clients = pgTable("clients", {
   stageIdx: index("clients_stage_idx").on(table.stage),
   priorityIdx: index("clients_priority_idx").on(table.priority),
   responsiblePersonIdx: index("clients_responsible_person_idx").on(table.responsiblePersonId),
+  serviceIdx: index("clients_service_idx").on(table.serviceId),
 }));
 
 // Normalized activities table
@@ -80,10 +90,18 @@ export const activities = pgTable("activities", {
 }));
 
 // Relations
+export const servicesRelations = relations(services, ({ many }) => ({
+  clients: many(clients),
+}));
+
 export const clientsRelations = relations(clients, ({ one, many }) => ({
   responsiblePerson: one(users, {
     fields: [clients.responsiblePersonId],
     references: [users.id],
+  }),
+  service: one(services, {
+    fields: [clients.serviceId],
+    references: [services.id],
   }),
   activities: many(activities),
 }));
@@ -150,6 +168,7 @@ export const clientFormSchema = z.object({
   priority: z.enum(["High", "Medium", "Low"]),
   responsiblePerson: z.string().min(1, "Responsible person is required"),
   country: z.string().min(1, "Country is required"),
+  service: z.string().min(1, "Service is required"),
   linkedin: z.string().optional().default(""),
   notes: z.string().default(""),
   lastFollowUp: z.string().min(1, "Last follow-up date is required"),
@@ -163,6 +182,7 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   createdAt: true,
   updatedAt: true,
   responsiblePersonId: true,
+  serviceId: true,
   source: true,
   industry: true,
   estimatedCloseDate: true,
@@ -195,6 +215,7 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   phone: z.string().min(1, "Phone number is required"),
   responsiblePerson: z.string().min(1, "Responsible person is required"),
   country: z.string().min(1, "Country is required"),
+  service: z.string().min(1, "Service is required"),
   linkedin: z.string().optional().default(""),
   notes: z.string().optional().default(""),
   lastFollowUp: z.string().min(1, "Last follow-up date is required").transform(val => new Date(val)),
@@ -206,6 +227,7 @@ export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Client = Omit<typeof clients.$inferSelect, 'value'> & {
   value: number;
   responsiblePerson?: string;
+  service?: string;
   activityHistory?: Activity[];
   pipelineStartDate?: Date;
 };
@@ -233,3 +255,21 @@ export const statusOptions = [
   "Budget Approval Pending"
 ] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;
+
+export const insertServiceSchema = createInsertSchema(services).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertService = z.infer<typeof insertServiceSchema>;
+export type Service = typeof services.$inferSelect;
+
+export const defaultServices = [
+  "Product Development",
+  "CRM",
+  "ERP",
+  "Mobile Development",
+  "Website Creation",
+  "Digital Marketing",
+  "ITSM"
+] as const;
