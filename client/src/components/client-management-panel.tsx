@@ -570,7 +570,7 @@ export function ClientManagementPanel({
                   name="value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Deal Value ($)</FormLabel>
+                      <FormLabel>Deal Value (Currency as per Country)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
