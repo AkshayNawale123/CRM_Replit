@@ -192,3 +192,19 @@ Preferred communication style: Simple, everyday language.
   - Activities include stage-appropriate actions (discovery calls, demos, proposals, contract reviews, etc.)
   - All 50 clients have assigned responsible persons for proper Performance analytics
   - Storage layer automatically creates users when adding activities or assigning responsible persons
+
+- **Client Portfolio UI Redesign**: Compact two-panel layout for maximum data visibility
+  - **ClientListPanel** (left panel): 
+    - Compact client cards with company, contact, value (formatted with currency), stage/priority badges, and country
+    - Filter popover with stage/priority dropdowns (replaces separate filter bar)
+    - Search functionality and client count display
+    - Add Client button accessible in header
+  - **ClientManagementPanel** (right panel, view mode):
+    - Header with company name, contact info, Edit and Close buttons
+    - Horizontal badge row showing Stage, Priority, Service, Status
+    - Two-column Contact/Deal information layout (side-by-side, not separate cards)
+    - Combined Notes & Activities section with timeline
+    - Bottom action bar: Schedule Follow-up, Send Email, Update Status, Delete Client
+  - Currency label updated to "Deal Value (Currency as per Country)"
+  - Country alias support (USA, UK, UAE abbreviations) for robust currency lookup
+  - Full CRUD functionality preserved (create, read, update, delete accessible from UI)
