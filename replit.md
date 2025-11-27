@@ -55,7 +55,7 @@ Preferred communication style: Simple, everyday language.
 
 **Migration Strategy**: Drizzle Kit for schema migrations with push-based deployment.
 
-**Development Mode**: In-memory storage implementation (`MemStorage`) with seed data for development and testing, allowing the application to run without database connectivity.
+**Storage**: Database-only storage (DbStorage) - all data is persisted directly to PostgreSQL. No in-memory fallback. DATABASE_URL is required for the application to run.
 
 ### Design System
 
@@ -153,3 +153,10 @@ Preferred communication style: Simple, everyday language.
   - **Metrics Separation**: Active pipeline metrics (stage charts, funnel, cycle time) only include non-Won/Lost deals; Win rate and Avg Won Deal calculated from closed deals (Won + Lost)
 
 - **Service Badge in Client Details**: Service now displays as a cyan-colored badge next to stage, status, and priority badges in client details view
+
+- **Database-Only Storage**: Removed all in-memory storage code
+  - Removed MemStorage class and all associated Map-based data storage
+  - Application now saves all data directly to PostgreSQL database
+  - DATABASE_URL environment variable is required for the application to run
+  - Reports and Analytics pages fetch data from database in real-time
+  - Auto-refresh on data changes: When clients are created, updated, deleted, or imported via Excel, all views (Dashboard, Reports, Analytics) automatically refresh using TanStack Query cache invalidation
