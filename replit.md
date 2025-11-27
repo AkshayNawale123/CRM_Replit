@@ -45,13 +45,31 @@ Preferred communication style: Simple, everyday language.
 
 **ORM**: Drizzle ORM configured for PostgreSQL dialect.
 
-**Database Schema**: Single `clients` table with the following structure:
+**Database Schema**: Four core tables:
+
+**clients** table:
 - Client identification (id, company name, contact person, email, phone)
 - Sales pipeline tracking (stage, status, value)
 - Follow-up management (last follow-up, next follow-up dates)
 - Priority classification (High, Medium, Low)
-- Activity history stored as JSONB array
+- Foreign keys: responsible_person_id (users), service_id (services)
 - Notes field for additional context
+
+**users** table:
+- Team members who manage client relationships
+- Fields: id, name, email, role (Sales Rep, Manager, Admin)
+- Used for Performance analytics view and activity tracking
+
+**activities** table:
+- Activity log for tracking all client interactions
+- Fields: id, client_id (FK), action, user_id (FK), created_at
+- Replaces legacy JSONB activity history with normalized table
+- Enables proper user-activity relationships and audit trail
+
+**services** table:
+- Available service offerings for clients
+- Default services: Product Development, CRM, ERP, Mobile Development, Website Creation, Digital Marketing, ITSM
+- Custom services can be added dynamically
 
 **Migration Strategy**: Drizzle Kit for schema migrations with push-based deployment.
 
@@ -160,3 +178,12 @@ Preferred communication style: Simple, everyday language.
   - DATABASE_URL environment variable is required for the application to run
   - Reports and Analytics pages fetch data from database in real-time
   - Auto-refresh on data changes: When clients are created, updated, deleted, or imported via Excel, all views (Dashboard, Reports, Analytics) automatically refresh using TanStack Query cache invalidation
+
+- **Users and Activity Logging System**: Fully implemented user management and activity tracking
+  - **Users table**: 8 sample team members (2 Managers, 6 Sales Reps) with email and role
+  - Team members: Sarah Johnson (Manager), Robert Williams (Manager), Michael Chen, Emily Rodriguez, David Kim, Jessica Patel, Amanda Foster, James Thompson (Sales Reps)
+  - **Activities table**: Normalized activity logging with user attribution
+  - 125+ activity records linked to users and clients
+  - Activities include stage-appropriate actions (discovery calls, demos, proposals, contract reviews, etc.)
+  - All 50 clients have assigned responsible persons for proper Performance analytics
+  - Storage layer automatically creates users when adding activities or assigning responsible persons
