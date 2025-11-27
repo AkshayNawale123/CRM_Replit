@@ -18,7 +18,7 @@ export function Navigation() {
             data-testid="nav-dashboard"
           >
             <LayoutDashboard className="h-4 w-4" />
-            Dashboard
+            Create Client
           </Button>
         </Link>
         <Link href="/reports">
