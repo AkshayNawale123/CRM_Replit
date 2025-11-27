@@ -137,11 +137,19 @@ Preferred communication style: Simple, everyday language.
   - Value stored in local currency (currency auto-detected from country)
   - Service field added with default options and ability to add custom services
 
-- **Analytics Dashboard**: New comprehensive analytics page with 4 views
+- **Analytics Dashboard**: New comprehensive analytics page with 5 views
   - **Overview**: KPI cards (Active Pipeline, Win Rate, Avg Won Deal, Avg Cycle Time), Pipeline by Stage chart, Cycle Time Distribution, Priority Distribution pie chart, Action Items (high priority follow-ups, stalled negotiations, conversion opportunities)
   - **Pipeline**: Sales Funnel visualization (active pipeline stages only), Deal Health scatter plot (days in pipeline vs deal value)
   - **Performance**: Team performance bar chart, individual team member cards with deals, pipeline value, won deals, and avg deal size
   - **Geographic**: Country-wise distribution charts, individual country cards with deal counts and values
+  - **Services**: Comprehensive service analytics view with:
+    - Service Line Insights: Highlight cards showing Highest Revenue service, Best Win Rate service, and Largest Average Deal size service
+    - Service Line Revenue Comparison: Horizontal bar chart comparing pipeline values across all services (color-coded)
+    - Service Portfolio Mix: Two pie charts showing distribution by pipeline value and by deal count
+    - Service Overview Cards: Individual cards for each service showing active deals, pipeline value, avg deal size, avg cycle time, won deals, and win rate
+    - Service Performance Metrics Table: Comprehensive sortable table with all service KPIs (deals, pipeline value, avg deal size, won, win rate, avg cycle)
   - All values displayed in INR using the country-currency conversion system
   - Navigation: Create Client → Reports → Analytics → Glossary
   - **Metrics Separation**: Active pipeline metrics (stage charts, funnel, cycle time) only include non-Won/Lost deals; Win rate and Avg Won Deal calculated from closed deals (Won + Lost)
+
+- **Service Badge in Client Details**: Service now displays as a cyan-colored badge next to stage, status, and priority badges in client details view

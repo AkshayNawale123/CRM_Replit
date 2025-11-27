@@ -12,12 +12,12 @@ import {
 } from "recharts";
 import {
   TrendingUp, TrendingDown, Users, DollarSign, AlertCircle,
-  Calendar, Award, Target, Globe, BarChart3
+  Calendar, Award, Target, Globe, BarChart3, Briefcase, Trophy, Star
 } from "lucide-react";
 import type { Client } from "@shared/schema";
 import { convertToINR, formatINR } from "@/lib/country-currency-data";
 
-type ViewType = 'overview' | 'pipeline' | 'performance' | 'geographic';
+type ViewType = 'overview' | 'pipeline' | 'performance' | 'geographic' | 'services';
 
 const CHART_COLORS = {
   primary: 'hsl(var(--primary))',
@@ -47,6 +47,17 @@ const PRIORITY_COLORS: Record<string, string> = {
   'High': '#ef4444',
   'Medium': '#f59e0b',
   'Low': '#3b82f6',
+};
+
+const SERVICE_COLORS: Record<string, string> = {
+  'ERP': '#3b82f6',
+  'CRM': '#8b5cf6',
+  'Product Development': '#06b6d4',
+  'Mobile Development': '#14b8a6',
+  'Website Creation': '#10b981',
+  'Digital Marketing': '#f59e0b',
+  'ITSM': '#f97316',
+  'Other': '#6b7280',
 };
 
 interface KPICardProps {
@@ -240,6 +251,86 @@ export default function Analytics() {
       return c.stage === 'Lead' && days >= 7;
     });
 
+    // Service Analytics Data
+    const serviceData = Object.entries(
+      clients.reduce((acc, c) => {
+        const service = c.service || 'Unspecified';
+        if (!acc[service]) {
+          acc[service] = { 
+            name: service, 
+            deals: 0, 
+            activeDeals: 0,
+            value: 0, 
+            won: 0, 
+            lost: 0,
+            totalCycleDays: 0,
+            closedDealsCount: 0
+          };
+        }
+        acc[service].deals++;
+        acc[service].value += convertToINR(c.value, c.country);
+        if (c.stage === 'Won') {
+          acc[service].won++;
+          acc[service].closedDealsCount++;
+          const startDate = c.pipelineStartDate ? new Date(c.pipelineStartDate) : new Date(c.createdAt);
+          acc[service].totalCycleDays += Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        }
+        if (c.stage === 'Lost') {
+          acc[service].lost++;
+          acc[service].closedDealsCount++;
+        }
+        if (c.stage !== 'Won' && c.stage !== 'Lost') {
+          acc[service].activeDeals++;
+          const startDate = c.pipelineStartDate ? new Date(c.pipelineStartDate) : new Date(c.createdAt);
+          acc[service].totalCycleDays += Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        }
+        return acc;
+      }, {} as Record<string, { 
+        name: string; 
+        deals: number; 
+        activeDeals: number;
+        value: number; 
+        won: number; 
+        lost: number;
+        totalCycleDays: number;
+        closedDealsCount: number;
+      }>)
+    ).map(([_, data]) => ({
+      ...data,
+      avgDealSize: data.deals > 0 ? data.value / data.deals : 0,
+      winRate: data.closedDealsCount > 0 ? (data.won / data.closedDealsCount) * 100 : 0,
+      avgCycleTime: data.activeDeals > 0 ? Math.round(data.totalCycleDays / data.activeDeals) : 0,
+      fill: SERVICE_COLORS[data.name] || '#6b7280',
+    })).filter(s => s.name !== 'Unspecified' && s.deals > 0).sort((a, b) => b.value - a.value);
+
+    // Service revenue comparison for horizontal bar chart
+    const serviceRevenueData = serviceData.map(s => ({
+      name: s.name,
+      value: s.value,
+      fill: s.fill,
+    })).sort((a, b) => b.value - a.value);
+
+    // Service portfolio mix - by value and by count
+    const serviceByValue = serviceData.map(s => ({
+      name: s.name,
+      value: s.value,
+      fill: s.fill,
+    }));
+    const serviceByCount = serviceData.map(s => ({
+      name: s.name,
+      value: s.deals,
+      fill: s.fill,
+    }));
+
+    // Service insights
+    const highestRevenueService = serviceData.length > 0 ? serviceData[0] : null;
+    const bestWinRateService = serviceData.length > 0 
+      ? [...serviceData].filter(s => s.closedDealsCount >= 1).sort((a, b) => b.winRate - a.winRate)[0] || null 
+      : null;
+    const largestAvgDealService = serviceData.length > 0 
+      ? [...serviceData].sort((a, b) => b.avgDealSize - a.avgDealSize)[0] 
+      : null;
+
     return {
       totalClients,
       wonCount,
@@ -264,6 +355,13 @@ export default function Analytics() {
       highPriorityNeedingAttention,
       stalledDeals,
       leadsReadyForQualification,
+      serviceData,
+      serviceRevenueData,
+      serviceByValue,
+      serviceByCount,
+      highestRevenueService,
+      bestWinRateService,
+      largestAvgDealService,
     };
   }, [clients]);
 
@@ -279,6 +377,7 @@ export default function Analytics() {
     { id: 'pipeline', label: 'Pipeline', icon: Target },
     { id: 'performance', label: 'Performance', icon: Users },
     { id: 'geographic', label: 'Geographic', icon: Globe },
+    { id: 'services', label: 'Services', icon: Briefcase },
   ];
 
   if (isLoading) {
@@ -675,6 +774,236 @@ export default function Analytics() {
                 </Card>
               ))}
             </div>
+          </div>
+        )}
+
+        {selectedView === 'services' && (
+          <div className="space-y-4">
+            {/* Service Insights Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {analytics.highestRevenueService && (
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Highest Revenue</p>
+                        <h4 className="font-bold text-lg text-foreground truncate">{analytics.highestRevenueService.name}</h4>
+                        <p className="text-sm text-muted-foreground">₹{formatValue(analytics.highestRevenueService.value)}</p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-blue-500 shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              {analytics.bestWinRateService && (
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">Best Win Rate</p>
+                        <h4 className="font-bold text-lg text-foreground truncate">{analytics.bestWinRateService.name}</h4>
+                        <p className="text-sm text-muted-foreground">{analytics.bestWinRateService.winRate.toFixed(1)}%</p>
+                      </div>
+                      <Trophy className="w-8 h-8 text-green-500 shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              {analytics.largestAvgDealService && (
+                <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Largest Avg Deal</p>
+                        <h4 className="font-bold text-lg text-foreground truncate">{analytics.largestAvgDealService.name}</h4>
+                        <p className="text-sm text-muted-foreground">₹{formatValue(analytics.largestAvgDealService.avgDealSize)}</p>
+                      </div>
+                      <Star className="w-8 h-8 text-amber-500 shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Service Revenue Comparison */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Service Line Revenue Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={analytics.serviceRevenueData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${formatValue(v)}`} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={140} />
+                    <Tooltip 
+                      formatter={(value: number) => formatINR(value)}
+                      contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
+                    />
+                    <Bar dataKey="value" name="Pipeline Value (INR)">
+                      {analytics.serviceRevenueData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Service Portfolio Mix - Two Pie Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Portfolio by Pipeline Value</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={analytics.serviceByValue}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }}
+                      >
+                        {analytics.serviceByValue.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value: number) => formatINR(value)}
+                        contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Portfolio by Deal Count</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={analytics.serviceByCount}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label={({ name, value }) => `${name}: ${value}`}
+                        labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }}
+                      >
+                        {analytics.serviceByCount.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Service Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {analytics.serviceData.map((service, idx) => (
+                <Card key={idx}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: service.fill }} />
+                        <h4 className="font-semibold text-foreground truncate">{service.name}</h4>
+                      </div>
+                      <Briefcase className="w-4 h-4 text-muted-foreground shrink-0" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Active Deals</p>
+                        <p className="text-lg font-bold text-foreground">{service.activeDeals}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Pipeline Value</p>
+                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">₹{formatValue(service.value)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Avg Deal Size</p>
+                        <p className="text-sm font-semibold text-foreground">₹{formatValue(service.avgDealSize)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Avg Cycle Time</p>
+                        <p className="text-sm font-semibold text-foreground">{service.avgCycleTime} days</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Won Deals</p>
+                        <p className="text-lg font-bold text-green-600 dark:text-green-400">{service.won}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Win Rate</p>
+                        <p className="text-sm font-semibold text-foreground">{service.winRate.toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Service Performance Metrics Table */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Service Performance Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-2 font-semibold text-foreground">Service</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Deals</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Pipeline Value</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Avg Deal Size</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Won</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Win Rate</th>
+                        <th className="text-right py-3 px-2 font-semibold text-foreground">Avg Cycle</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.serviceData.map((service, idx) => (
+                        <tr key={idx} className="border-b border-border/50 hover:bg-muted/30">
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: service.fill }} />
+                              <span className="text-foreground font-medium">{service.name}</span>
+                            </div>
+                          </td>
+                          <td className="text-right py-3 px-2 text-foreground">{service.deals}</td>
+                          <td className="text-right py-3 px-2 text-blue-600 dark:text-blue-400 font-medium">₹{formatValue(service.value)}</td>
+                          <td className="text-right py-3 px-2 text-foreground">₹{formatValue(service.avgDealSize)}</td>
+                          <td className="text-right py-3 px-2 text-green-600 dark:text-green-400 font-medium">{service.won}</td>
+                          <td className="text-right py-3 px-2 text-foreground">{service.winRate.toFixed(1)}%</td>
+                          <td className="text-right py-3 px-2 text-foreground">{service.avgCycleTime} days</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {analytics.serviceData.length === 0 && (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground font-medium mb-2">No Service Data Available</p>
+                  <p className="text-sm text-muted-foreground">Add services to your clients to see analytics here</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
