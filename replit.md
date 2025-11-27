@@ -137,7 +137,12 @@ Preferred communication style: Simple, everyday language.
 - **Country-based Currency System**: Implemented comprehensive currency handling
   - Added searchable country dropdown with 50+ countries and their currencies
   - Auto-selects currency based on country (e.g., United States → USD, India → INR)
-  - Value displays use country-specific currency symbols ($, £, €, ¥, etc.)
+  - Value displays use country-specific currency symbols ($, £, €, ¥, د.إ, etc.) across all components:
+    - Client list panel (compact format with K/M suffixes)
+    - Client details dialog (full format)
+    - Client management panel (Deal Value section)
+    - Reports table
+  - Country alias support for common abbreviations (UAE, USA, UK)
   - Exchange rates stored in `client/src/lib/country-currency-data.ts`
 
 - **Value (in INR) Column in Reports**: Added INR conversion column
