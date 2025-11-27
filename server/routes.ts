@@ -1,9 +1,13 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertClientSchema, addActivitySchema } from "@shared/schema";
-import { generateExcelTemplate, parseExcelFile } from "./excel-utils";
+import { generateExcelTemplate, parseExcelFile, validateExcelFile } from "./excel-utils";
 import multer from "multer";
+
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients", async (_req, res) => {
@@ -96,7 +100,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Excel import/export endpoints
   app.get("/api/clients/export/template", (_req, res) => {
     try {
       const buffer = generateExcelTemplate();
@@ -106,44 +109,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.send(buffer);
     } catch (error) {
+      console.error("Template generation error:", error);
       res.status(500).json({ error: "Failed to generate template" });
     }
   });
 
-  const upload = multer({ storage: multer.memoryStorage() });
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const allowedMimeTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel',
+      ];
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Please upload an Excel file (.xlsx or .xls)'));
+      }
+    }
+  });
 
-  app.post("/api/clients/import", upload.single("file"), async (req, res) => {
+  app.post("/api/clients/import", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file provided" });
       }
 
-      const clients = parseExcelFile(req.file.buffer);
-      const createdClients = [];
-      const errors = [];
+      const validation = validateExcelFile(req.file);
+      if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+      }
 
-      for (let i = 0; i < clients.length; i++) {
+      const parsedClients = parseExcelFile(req.file.buffer);
+      
+      if (parsedClients.length === 0) {
+        return res.status(400).json({ error: "No data found in the Excel file" });
+      }
+
+      const createdClients = [];
+      const errors: { row: number; field?: string; error: string }[] = [];
+
+      for (let i = 0; i < parsedClients.length; i++) {
+        const rowNum = i + 2;
+        const client = parsedClients[i];
+        
+        if (!client.companyName || client.companyName.trim() === '') {
+          errors.push({ row: rowNum, field: 'Company Name', error: 'Company name is required' });
+          continue;
+        }
+        if (!client.contactPerson || client.contactPerson.trim() === '') {
+          errors.push({ row: rowNum, field: 'Contact Person', error: 'Contact person is required' });
+          continue;
+        }
+        if (!client.email || !client.email.includes('@')) {
+          errors.push({ row: rowNum, field: 'Email', error: 'Valid email is required' });
+          continue;
+        }
+        if (!client.phone || client.phone.trim() === '') {
+          errors.push({ row: rowNum, field: 'Phone', error: 'Phone number is required' });
+          continue;
+        }
+        if (!client.country || client.country.trim() === '') {
+          errors.push({ row: rowNum, field: 'Country', error: 'Country is required' });
+          continue;
+        }
+
         try {
-          const validatedData = insertClientSchema.parse(clients[i]);
+          const clientData = {
+            companyName: client.companyName,
+            contactPerson: client.contactPerson,
+            email: client.email,
+            phone: client.phone,
+            stage: client.stage,
+            status: client.status,
+            value: client.value,
+            priority: client.priority,
+            responsiblePerson: client.responsiblePerson,
+            country: client.country,
+            linkedin: client.linkedin,
+            notes: client.notes,
+            lastFollowUp: client.lastFollowUp,
+            nextFollowUp: client.nextFollowUp,
+            activityHistory: [],
+          };
+          
+          const validatedData = insertClientSchema.parse(clientData);
           const createdClient = await storage.createClient(validatedData);
           createdClients.push(createdClient);
         } catch (error) {
-          errors.push({
-            row: i + 2,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
+          const errorMessage = error instanceof Error ? error.message : "Validation failed";
+          errors.push({ row: rowNum, error: errorMessage });
         }
       }
 
       res.json({
-        success: true,
+        success: createdClients.length > 0,
         imported: createdClients.length,
-        total: clients.length,
+        total: parsedClients.length,
         errors,
         clients: createdClients,
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to import clients" });
+      console.error("Import error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to import clients";
+      res.status(500).json({ error: errorMessage });
     }
   });
 

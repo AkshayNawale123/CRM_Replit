@@ -1,5 +1,4 @@
 import * as XLSX from 'xlsx';
-import type { InsertClient } from '@shared/schema';
 
 export interface ExcelRow {
   'Company Name': string;
@@ -8,7 +7,7 @@ export interface ExcelRow {
   'Phone': string;
   'Stage': string;
   'Status': string;
-  'Value': number;
+  'Value': number | string;
   'Priority': string;
   'Responsible Person': string;
   'Country': string;
@@ -17,6 +16,38 @@ export interface ExcelRow {
   'Last Follow-up': string;
   'Next Follow-up': string;
 }
+
+export interface ParsedClient {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  stage: string;
+  status: string | null;
+  value: number;
+  priority: string;
+  responsiblePerson: string;
+  country: string;
+  linkedin: string;
+  notes: string;
+  lastFollowUp: string;
+  nextFollowUp: string;
+  activityHistory: any[];
+}
+
+const VALID_STAGES = [
+  'Lead', 'Qualified', 'Meeting Scheduled', 'Demo Completed', 
+  'Proof of Concept (POC)', 'Proposal Sent', 'Verbal Commitment', 
+  'Contract Review', 'Won', 'Lost'
+];
+
+const VALID_STATUSES = [
+  'In Negotiation', 'Proposal Rejected', 'On Hold', 
+  'Pending Review', 'Awaiting Response', 'Under Evaluation', 
+  'Budget Approval Pending'
+];
+
+const VALID_PRIORITIES = ['High', 'Medium', 'Low'];
 
 export function generateExcelTemplate(): Buffer {
   const headers: (keyof ExcelRow)[] = [
@@ -42,7 +73,7 @@ export function generateExcelTemplate(): Buffer {
     'Email': 'john@example.com',
     'Phone': '+1-555-0123',
     'Stage': 'Lead',
-    'Status': 'In Negotiation',
+    'Status': '',
     'Value': 100000,
     'Priority': 'High',
     'Responsible Person': 'Sarah Johnson',
@@ -55,20 +86,19 @@ export function generateExcelTemplate(): Buffer {
 
   const ws = XLSX.utils.json_to_sheet([sampleRow], { header: headers });
   
-  // Set column widths
   ws['!cols'] = [
     { wch: 20 },
     { wch: 18 },
-    { wch: 20 },
+    { wch: 25 },
     { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
+    { wch: 22 },
+    { wch: 22 },
     { wch: 12 },
     { wch: 12 },
     { wch: 18 },
     { wch: 15 },
-    { wch: 25 },
-    { wch: 25 },
+    { wch: 30 },
+    { wch: 30 },
     { wch: 15 },
     { wch: 15 },
   ];
@@ -76,47 +106,114 @@ export function generateExcelTemplate(): Buffer {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Clients');
 
-  // Add info sheet
-  const infoWs = XLSX.utils.sheet_add_aoa(XLSX.utils.aoa_to_sheet([
+  const instructionData = [
     ['CRM Import Template Instructions'],
     [''],
-    ['Stage Options:'],
-    ['Lead', 'Qualified', 'Meeting Scheduled', 'Demo Completed', 'Proof of Concept (POC)', 'Proposal Sent', 'Verbal Commitment', 'Contract Review', 'Won', 'Lost'],
+    ['Stage Options (Required):'],
+    ['Lead, Qualified, Meeting Scheduled, Demo Completed, Proof of Concept (POC), Proposal Sent, Verbal Commitment, Contract Review, Won, Lost'],
     [''],
-    ['Status Options (optional):'],
-    ['In Negotiation', 'Proposal Rejected', 'On Hold', 'Pending Review', 'Awaiting Response', 'Under Evaluation', 'Budget Approval Pending'],
+    ['Status Options (Optional - leave empty if not applicable):'],
+    ['In Negotiation, Proposal Rejected, On Hold, Pending Review, Awaiting Response, Under Evaluation, Budget Approval Pending'],
     [''],
-    ['Priority Options:'],
-    ['High', 'Medium', 'Low'],
+    ['Priority Options (Required):'],
+    ['High, Medium, Low'],
     [''],
-    ['Date Format: YYYY-MM-DD'],
-    ['Value: Numeric amount (e.g., 100000)'],
-  ]), { origin: 'A1' });
+    ['Date Format: YYYY-MM-DD (e.g., 2025-11-20)'],
+    ['Value: Numeric amount without currency symbols (e.g., 100000)'],
+    [''],
+    ['Notes:'],
+    ['- Delete the sample row before importing your data'],
+    ['- All fields except Status, LinkedIn, and Notes are required'],
+    ['- Email must be valid format'],
+  ];
+  
+  const infoWs = XLSX.utils.aoa_to_sheet(instructionData);
+  infoWs['!cols'] = [{ wch: 100 }];
   
   XLSX.utils.book_append_sheet(wb, infoWs, 'Instructions');
 
-  return XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+  return Buffer.from(XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' }));
 }
 
-export function parseExcelFile(buffer: Buffer): InsertClient[] {
+function parseDate(dateStr: string | undefined, defaultDate: Date): string {
+  if (!dateStr || dateStr.trim() === '') {
+    return defaultDate.toISOString();
+  }
+  
+  const parsed = new Date(dateStr);
+  if (isNaN(parsed.getTime())) {
+    return defaultDate.toISOString();
+  }
+  
+  return parsed.toISOString();
+}
+
+function validateStage(stage: string | undefined): string {
+  if (!stage) return 'Lead';
+  const trimmed = stage.trim();
+  return VALID_STAGES.includes(trimmed) ? trimmed : 'Lead';
+}
+
+function validateStatus(status: string | undefined): string | null {
+  if (!status || status.trim() === '') return null;
+  const trimmed = status.trim();
+  return VALID_STATUSES.includes(trimmed) ? trimmed : null;
+}
+
+function validatePriority(priority: string | undefined): string {
+  if (!priority) return 'Medium';
+  const trimmed = priority.trim();
+  return VALID_PRIORITIES.includes(trimmed) ? trimmed : 'Medium';
+}
+
+function parseValue(value: number | string | undefined): number {
+  if (value === undefined || value === null || value === '') return 0;
+  const num = typeof value === 'number' ? value : parseFloat(value);
+  return isNaN(num) ? 0 : Math.max(0, num);
+}
+
+export function parseExcelFile(buffer: Buffer): ParsedClient[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
+  const now = new Date();
+  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
   return rows.map((row) => ({
-    companyName: row['Company Name']?.trim() || '',
-    contactPerson: row['Contact Person']?.trim() || '',
-    email: row['Email']?.trim() || '',
-    phone: row['Phone']?.trim() || '',
-    stage: (row['Stage']?.trim() || 'Lead') as any,
-    status: row['Status']?.trim() ? (row['Status'].trim() as any) : null,
-    value: typeof row['Value'] === 'number' ? row['Value'].toString() : (row['Value'] || '0').toString(),
-    priority: (row['Priority']?.trim() || 'Medium') as any,
-    responsiblePerson: row['Responsible Person']?.trim() || 'Unassigned',
-    country: row['Country']?.trim() || '',
-    linkedin: row['LinkedIn']?.trim() || '',
-    notes: row['Notes']?.trim() || '',
-    lastFollowUp: row['Last Follow-up'] ? new Date(row['Last Follow-up']).toISOString() : new Date().toISOString(),
-    nextFollowUp: row['Next Follow-up'] ? new Date(row['Next Follow-up']).toISOString() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    companyName: row['Company Name']?.toString().trim() || '',
+    contactPerson: row['Contact Person']?.toString().trim() || '',
+    email: row['Email']?.toString().trim() || '',
+    phone: row['Phone']?.toString().trim() || '',
+    stage: validateStage(row['Stage']?.toString()),
+    status: validateStatus(row['Status']?.toString()),
+    value: parseValue(row['Value']),
+    priority: validatePriority(row['Priority']?.toString()),
+    responsiblePerson: row['Responsible Person']?.toString().trim() || 'Unassigned',
+    country: row['Country']?.toString().trim() || '',
+    linkedin: row['LinkedIn']?.toString().trim() || '',
+    notes: row['Notes']?.toString().trim() || '',
+    lastFollowUp: parseDate(row['Last Follow-up']?.toString(), now),
+    nextFollowUp: parseDate(row['Next Follow-up']?.toString(), nextWeek),
+    activityHistory: [],
   }));
+}
+
+export function validateExcelFile(file: Express.Multer.File): { valid: boolean; error?: string } {
+  const allowedMimeTypes = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+  ];
+  
+  const maxSize = 5 * 1024 * 1024;
+  
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    return { valid: false, error: 'Invalid file type. Please upload an Excel file (.xlsx or .xls)' };
+  }
+  
+  if (file.size > maxSize) {
+    return { valid: false, error: 'File too large. Maximum size is 5MB' };
+  }
+  
+  return { valid: true };
 }

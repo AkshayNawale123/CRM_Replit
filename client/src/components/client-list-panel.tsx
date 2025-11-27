@@ -29,7 +29,7 @@ export function ClientListPanel({ clients, selectedClientId, onSelectClient, onA
         (client.status && client.status.toLowerCase().includes(query)) ||
         client.priority.toLowerCase().includes(query) ||
         client.country.toLowerCase().includes(query) ||
-        client.responsiblePerson.toLowerCase().includes(query)
+        (client.responsiblePerson && client.responsiblePerson.toLowerCase().includes(query))
     );
   }, [clients, searchQuery]);
 
