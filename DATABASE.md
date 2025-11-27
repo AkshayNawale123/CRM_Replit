@@ -1,7 +1,7 @@
 # CRM Database Documentation
 
-**Version:** 1.0  
-**Last Updated:** November 19, 2025  
+**Version:** 1.1  
+**Last Updated:** November 27, 2025  
 **Owner:** Development Team  
 **Status:** Active Development
 
@@ -61,7 +61,7 @@ The database schema supports a full-featured CRM system with:
 - **Schema Validation:** Zod (v3.23.x) with drizzle-zod integration
 
 ### Development Environment
-- **Development Storage:** In-memory storage (MemStorage)
+- **Storage:** PostgreSQL via Neon (database-only, no in-memory fallback)
 - **TypeScript:** v5.x
 - **Runtime:** Node.js v20+
 
@@ -632,18 +632,18 @@ ON clients(responsible_person_id, stage);
 
 ## Storage Implementation
 
-### Development Environment (Current)
+### Database-Only Storage (Current)
 
-**Implementation:** In-Memory Storage (MemStorage)  
+**Implementation:** PostgreSQL via Neon Serverless (DbStorage)  
 **Location:** `server/storage.ts`  
-**Purpose:** Development and testing without database dependency
+**Purpose:** All data persistence - development and production use the same storage layer
 
 **Characteristics:**
-- Data stored in JavaScript Map objects
-- Data persists only during server runtime
-- Seed data loaded on server start
-- No persistence across restarts
-- Fast and lightweight for development
+- All data stored directly in PostgreSQL database
+- Data persists across server restarts
+- No in-memory fallback or seed data
+- DATABASE_URL environment variable is **required** for the application to run
+- Real-time data fetching with TanStack Query cache invalidation
 
 **Storage Interface:**
 ```typescript
@@ -653,19 +653,26 @@ interface IStorage {
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: string, client: Partial<InsertClient>): Promise<Client>;
   deleteClient(id: string): Promise<void>;
+  getServices(): Promise<Service[]>;
+  createService(service: InsertService): Promise<Service>;
   // ... additional methods
 }
 ```
 
+**Data Refresh Mechanism:**
+- Frontend uses TanStack Query with `queryKey: ["/api/clients"]`
+- Cache invalidation occurs after create, update, delete, and Excel import operations
+- All views (Dashboard, Reports, Analytics) automatically refresh when data changes
+
 **When to Use:**
-- Local development
-- Running tests
-- CI/CD pipelines
-- Demo environments
+- Local development (requires DATABASE_URL)
+- Production deployments
+- Staging environments
+- All environments require database connectivity
 
 ---
 
-### Production Environment (PostgreSQL)
+### PostgreSQL Configuration
 
 **Implementation:** PostgreSQL via Neon  
 **Location:** `server/db.ts`  
@@ -699,31 +706,21 @@ const db = drizzle(sql);
 
 ---
 
-### Migration Path
+### Data Import
 
-**From MemStorage to PostgreSQL:**
+**Importing Data via Excel:**
 
-1. **Prepare Database:**
-   ```bash
-   npm run db:push  # Apply schema to database
-   ```
+The application supports bulk data import via Excel files:
+1. Download the Excel template from the Reports page
+2. Fill in client data following the template format
+3. Upload the completed Excel file
+4. Data is validated and imported directly to PostgreSQL
+5. All views automatically refresh after import
 
-2. **Update Storage Selection:**
-   ```typescript
-   // server/index.ts
-   const storage = process.env.DATABASE_URL 
-     ? new DatabaseStorage(db)
-     : new MemStorage();
-   ```
-
-3. **Migrate Data:**
-   - Export data from development
-   - Import into PostgreSQL using migration script
-   - Verify data integrity
-
-4. **Deploy:**
-   - Set `DATABASE_URL` environment variable
-   - Restart application
+**Manual Data Entry:**
+- Use the "Add Client" form in the Dashboard
+- Data is immediately saved to the database
+- No server restart required
 
 ---
 
@@ -737,18 +734,16 @@ npm install
 ```
 
 **2. Configure Environment:**
-Create `.env` file (optional for MemStorage):
+Create `.env` file (**required** - no fallback storage):
 ```env
-# Optional: Connect to PostgreSQL
-DATABASE_URL=postgresql://user:password@localhost:5432/crm_dev
-
-# Optional: Neon connection
+# Required: PostgreSQL connection (Neon)
 DATABASE_URL=postgresql://user:password@hostname.neon.tech/neondb?sslmode=require
 ```
 
-**3. Generate Schema (if using PostgreSQL):**
+**Important:** The application will **not start** without a valid DATABASE_URL.
+
+**3. Apply Schema to Database:**
 ```bash
-npm run db:generate  # Generate migration files
 npm run db:push      # Apply schema to database
 ```
 
@@ -853,8 +848,35 @@ psql $DATABASE_URL < backup.sql
 
 ## Version History
 
-### Version 1.0 (November 19, 2025)
+### Version 1.1 (November 27, 2025)
 **Status:** Active Development
+
+**Changes:**
+- **Removed in-memory storage (MemStorage)** - Application now uses database-only storage
+- Removed ~600 lines of MemStorage class code from `server/storage.ts`
+- Removed all Map-based data storage and seed data
+- Made `DATABASE_URL` environment variable **required** (no fallback)
+- Added `services` table for tracking client service interests
+- Added `pipelineStartDate` field to clients for accurate pipeline duration tracking
+- Implemented real-time data refresh using TanStack Query cache invalidation
+- All views (Dashboard, Reports, Analytics) automatically refresh when data changes
+- Added Excel import/export functionality with direct database persistence
+
+**Breaking Changes:**
+- Application will not start without a valid `DATABASE_URL`
+- No in-memory fallback for development/testing
+
+**Schema Statistics:**
+- 4 tables (users, clients, activities, services)
+- 5 enum types
+- 4+ indexes
+- 3 foreign key relationships
+- ~35 total columns
+
+---
+
+### Version 1.0 (November 19, 2025)
+**Status:** Superseded by v1.1
 
 **Changes:**
 - Initial schema design
@@ -908,5 +930,5 @@ For questions or clarifications about this database schema, contact the developm
 ---
 
 **Document Status:** ✅ Complete  
-**Review Date:** November 19, 2025  
+**Review Date:** November 27, 2025  
 **Next Review:** Upon schema changes or quarterly
