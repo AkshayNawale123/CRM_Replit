@@ -33,10 +33,12 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
     return format(dateObj, "MM/dd/yyyy");
   };
 
-  const getDaysInPipeline = (createdAt: Date | string) => {
-    const createdDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+  const getDaysInPipeline = (pipelineStartDate: Date | string | undefined, createdAt: Date | string) => {
+    const startDate = pipelineStartDate 
+      ? (typeof pipelineStartDate === "string" ? new Date(pipelineStartDate) : pipelineStartDate)
+      : (typeof createdAt === "string" ? new Date(createdAt) : createdAt);
     const today = new Date();
-    const days = differenceInDays(today, createdDate);
+    const days = differenceInDays(today, startDate);
     return Math.max(0, days);
   };
 
@@ -152,7 +154,7 @@ export function ClientTable({ clients, onEditClient, sortField, sortOrder, onSor
                       <PriorityBadge priority={client.priority as any} />
                     </TableCell>
                     <TableCell className="py-2 px-3 text-center font-semibold text-foreground text-sm" data-testid={`text-days-pipeline-${client.id}`}>
-                      {getDaysInPipeline(client.createdAt)} days
+                      {getDaysInPipeline(client.pipelineStartDate, client.createdAt)} days
                     </TableCell>
                     <TableCell className="py-2 px-3 text-right">
                       <Button

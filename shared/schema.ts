@@ -207,6 +207,7 @@ export type Client = Omit<typeof clients.$inferSelect, 'value'> & {
   value: number;
   responsiblePerson?: string;
   activityHistory?: Activity[];
+  pipelineStartDate?: Date;
 };
 
 export const stageOptions = [

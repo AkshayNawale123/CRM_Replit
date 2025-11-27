@@ -7,7 +7,7 @@ import ws from "ws";
 export interface IStorage {
   getAllClients(): Promise<Client[]>;
   getClient(id: string): Promise<Client | undefined>;
-  createClient(client: InsertClient): Promise<Client>;
+  createClient(client: InsertClient & { pipelineStartDate?: Date }): Promise<Client>;
   updateClient(id: string, client: InsertClient): Promise<Client | undefined>;
   deleteClient(id: string): Promise<boolean>;
   addActivity(clientId: string, activity: { action: string; user: string }): Promise<Client | undefined>;
@@ -234,6 +234,7 @@ export class MemStorage implements IStorage {
           { id: "2", action: "Proposal sent", user: "Mike", date: "11/10/2025" },
           { id: "3", action: "Initial meeting", user: "Sarah", date: "11/5/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-05"),
         createdAt: new Date("2025-11-05"),
         updatedAt: new Date("2025-11-15"),
       },
@@ -261,6 +262,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Pricing discussion", user: "Tom", date: "11/16/2025" },
           { id: "2", action: "Proposal submitted", user: "Sarah", date: "11/10/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-08"),
         createdAt: new Date("2025-11-08"),
         updatedAt: new Date("2025-11-16"),
       },
@@ -288,6 +290,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Contract signed", user: "Mike", date: "11/17/2025" },
           { id: "2", action: "Final negotiations", user: "Sarah", date: "11/12/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-01"),
         createdAt: new Date("2025-11-01"),
         updatedAt: new Date("2025-11-17"),
       },
@@ -314,6 +317,7 @@ export class MemStorage implements IStorage {
         activityHistory: [
           { id: "1", action: "Discovery call", user: "Tom", date: "11/14/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-14"),
         createdAt: new Date("2025-11-14"),
         updatedAt: new Date("2025-11-14"),
       },
@@ -341,6 +345,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Technical review meeting", user: "Sarah", date: "11/18/2025" },
           { id: "2", action: "Proposal sent", user: "Mike", date: "11/15/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-12"),
         createdAt: new Date("2025-11-12"),
         updatedAt: new Date("2025-11-18"),
       },
@@ -367,6 +372,7 @@ export class MemStorage implements IStorage {
         activityHistory: [
           { id: "1", action: "Initial call", user: "Tom", date: "11/13/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-13"),
         createdAt: new Date("2025-11-13"),
         updatedAt: new Date("2025-11-13"),
       },
@@ -394,6 +400,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Demo scheduled", user: "Mike", date: "11/19/2025" },
           { id: "2", action: "Requirements gathering", user: "Mike", date: "11/15/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-10"),
         createdAt: new Date("2025-11-10"),
         updatedAt: new Date("2025-11-19"),
       },
@@ -421,6 +428,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Security audit review", user: "Sarah", date: "11/17/2025" },
           { id: "2", action: "Proposal presented", user: "Mike", date: "11/14/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-09"),
         createdAt: new Date("2025-11-09"),
         updatedAt: new Date("2025-11-17"),
       },
@@ -447,6 +455,7 @@ export class MemStorage implements IStorage {
         activityHistory: [
           { id: "1", action: "First contact", user: "Tom", date: "11/16/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-16"),
         createdAt: new Date("2025-11-16"),
         updatedAt: new Date("2025-11-16"),
       },
@@ -474,6 +483,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Contract signed", user: "Mike", date: "11/18/2025" },
           { id: "2", action: "Final review", user: "Sarah", date: "11/16/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-01"),
         createdAt: new Date("2025-11-01"),
         updatedAt: new Date("2025-11-18"),
       },
@@ -501,6 +511,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Platform demo", user: "Sarah", date: "11/15/2025" },
           { id: "2", action: "Needs assessment", user: "Tom", date: "11/12/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-11"),
         createdAt: new Date("2025-11-11"),
         updatedAt: new Date("2025-11-15"),
       },
@@ -528,6 +539,7 @@ export class MemStorage implements IStorage {
           { id: "1", action: "Proposal feedback received", user: "Tom", date: "11/14/2025" },
           { id: "2", action: "Proposal sent", user: "Mike", date: "11/08/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-06"),
         createdAt: new Date("2025-11-06"),
         updatedAt: new Date("2025-11-14"),
       },
@@ -554,6 +566,7 @@ export class MemStorage implements IStorage {
         activityHistory: [
           { id: "1", action: "Information sent", user: "Tom", date: "11/12/2025" },
         ],
+        pipelineStartDate: new Date("2025-11-12"),
         createdAt: new Date("2025-11-12"),
         updatedAt: new Date("2025-11-12"),
       },
@@ -573,8 +586,9 @@ export class MemStorage implements IStorage {
     return this.clients.get(id);
   }
 
-  async createClient(insertClient: InsertClient): Promise<Client> {
+  async createClient(insertClient: InsertClient & { pipelineStartDate?: Date }): Promise<Client> {
     const id = randomUUID();
+    const now = new Date();
     const client: Client = {
       ...insertClient,
       id,
@@ -590,8 +604,9 @@ export class MemStorage implements IStorage {
       industry: null,
       estimatedCloseDate: null,
       winProbability: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      pipelineStartDate: insertClient.pipelineStartDate || now,
+      createdAt: now,
+      updatedAt: now,
     };
     this.clients.set(id, client);
     return client;
@@ -618,6 +633,7 @@ export class MemStorage implements IStorage {
       industry: existing.industry,
       estimatedCloseDate: existing.estimatedCloseDate,
       winProbability: existing.winProbability,
+      pipelineStartDate: existing.pipelineStartDate,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
     };

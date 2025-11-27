@@ -195,7 +195,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           const validatedData = insertClientSchema.parse(clientData);
-          const createdClient = await storage.createClient(validatedData);
+          const pipelineStartDate = new Date(client.lastFollowUp);
+          const createdClient = await storage.createClient({ ...validatedData, pipelineStartDate });
           createdClients.push(createdClient);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Validation failed";

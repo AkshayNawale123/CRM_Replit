@@ -100,3 +100,11 @@ Preferred communication style: Simple, everyday language.
 
 **Query Management**:
 - TanStack Query for data fetching, caching, and synchronization with configurable retry logic and stale time management
+
+## Recent Changes
+
+### November 27, 2025
+- **Days in Pipeline Calculation**: Updated to use `pipelineStartDate` field
+  - For Excel imports: Uses the "Last Follow-up" date as the pipeline start date
+  - For manual "Add Client": Uses the creation date (today's date)
+  - This allows imported clients to show accurate pipeline duration based on when they actually entered the pipeline, not when they were imported into the system
