@@ -1,6 +1,6 @@
-import { type Client, type InsertClient, type Service, type InsertService, clients, users, activities, services } from "@shared/schema";
+import { type Client, type InsertClient, type Service, type InsertService, type StageHistory, type StageAnalytics, type ClientStageTimeline, clients, users, activities, services, clientStageHistory } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-serverless";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, isNull, and, desc } from "drizzle-orm";
 import ws from "ws";
 
 export interface IStorage {
@@ -14,6 +14,11 @@ export interface IStorage {
   getAllServices(): Promise<Service[]>;
   createService(service: InsertService): Promise<Service>;
   getServiceByName(name: string): Promise<Service | undefined>;
+  // Stage history methods
+  getClientStageHistory(clientId: string): Promise<StageHistory[]>;
+  getStageAnalytics(): Promise<StageAnalytics[]>;
+  getClientTimeline(clientId: string): Promise<ClientStageTimeline | undefined>;
+  backfillStageHistory(): Promise<number>;
 }
 
 export class DbStorage implements IStorage {
@@ -136,7 +141,16 @@ export class DbStorage implements IStorage {
     };
 
     const result = await this.db.insert(clients).values(clientData).returning();
-    return this.enrichClientWithRelations(result[0]);
+    const newClient = result[0];
+
+    // Record initial stage in history
+    await this.db.insert(clientStageHistory).values({
+      clientId: newClient.id,
+      stage: newClient.stage,
+      enteredAt: new Date(),
+    });
+
+    return this.enrichClientWithRelations(newClient);
   }
 
   async updateClient(id: string, insertClient: InsertClient): Promise<Client | undefined> {
@@ -188,6 +202,46 @@ export class DbStorage implements IStorage {
       serviceId: serviceId,
       updatedAt: new Date(),
     };
+
+    // Check if stage has changed
+    const oldStage = existing[0].stage;
+    const newStage = insertClient.stage;
+    
+    if (oldStage !== newStage) {
+      const now = new Date();
+      
+      // Close the previous stage record (set exitedAt and calculate duration)
+      const openStageRecord = await this.db
+        .select()
+        .from(clientStageHistory)
+        .where(
+          and(
+            eq(clientStageHistory.clientId, id),
+            isNull(clientStageHistory.exitedAt)
+          )
+        )
+        .limit(1);
+      
+      if (openStageRecord[0]) {
+        const enteredAt = new Date(openStageRecord[0].enteredAt);
+        const durationSeconds = Math.floor((now.getTime() - enteredAt.getTime()) / 1000);
+        
+        await this.db
+          .update(clientStageHistory)
+          .set({
+            exitedAt: now,
+            durationSeconds: durationSeconds,
+          })
+          .where(eq(clientStageHistory.id, openStageRecord[0].id));
+      }
+      
+      // Create a new stage record for the new stage
+      await this.db.insert(clientStageHistory).values({
+        clientId: id,
+        stage: newStage,
+        enteredAt: now,
+      });
+    }
 
     const result = await this.db
       .update(clients)
@@ -262,6 +316,82 @@ export class DbStorage implements IStorage {
       .where(eq(services.name, name))
       .limit(1);
     return result[0];
+  }
+
+  // Stage history methods
+  async getClientStageHistory(clientId: string): Promise<StageHistory[]> {
+    const result = await this.db
+      .select()
+      .from(clientStageHistory)
+      .where(eq(clientStageHistory.clientId, clientId))
+      .orderBy(desc(clientStageHistory.enteredAt));
+    return result;
+  }
+
+  async getStageAnalytics(): Promise<StageAnalytics[]> {
+    const result = await this.db
+      .select({
+        stage: clientStageHistory.stage,
+        avgDuration: sql<number>`AVG(duration_seconds)`,
+        totalClients: sql<number>`COUNT(DISTINCT client_id)`,
+        completedClients: sql<number>`COUNT(CASE WHEN exited_at IS NOT NULL THEN 1 END)`,
+      })
+      .from(clientStageHistory)
+      .groupBy(clientStageHistory.stage);
+
+    return result.map(row => ({
+      stage: row.stage,
+      averageDurationSeconds: row.avgDuration || 0,
+      averageDurationDays: row.avgDuration ? Math.round((row.avgDuration / 86400) * 100) / 100 : 0,
+      totalClients: Number(row.totalClients) || 0,
+      completedClients: Number(row.completedClients) || 0,
+    }));
+  }
+
+  async getClientTimeline(clientId: string): Promise<ClientStageTimeline | undefined> {
+    const client = await this.db.select().from(clients).where(eq(clients.id, clientId)).limit(1);
+    if (!client[0]) return undefined;
+
+    const stages = await this.getClientStageHistory(clientId);
+    
+    const totalDurationSeconds = stages.reduce((acc, stage) => {
+      return acc + (stage.durationSeconds || 0);
+    }, 0);
+
+    return {
+      clientId: client[0].id,
+      companyName: client[0].companyName,
+      stages,
+      totalDurationDays: Math.round((totalDurationSeconds / 86400) * 100) / 100,
+      currentStage: client[0].stage,
+    };
+  }
+
+  async backfillStageHistory(): Promise<number> {
+    // Get all clients that don't have any stage history records
+    const allClients = await this.db.select().from(clients);
+    let backfilledCount = 0;
+
+    for (const client of allClients) {
+      // Check if this client already has stage history
+      const existingHistory = await this.db
+        .select()
+        .from(clientStageHistory)
+        .where(eq(clientStageHistory.clientId, client.id))
+        .limit(1);
+
+      if (existingHistory.length === 0) {
+        // Create an initial stage record using createdAt as enteredAt
+        await this.db.insert(clientStageHistory).values({
+          clientId: client.id,
+          stage: client.stage,
+          enteredAt: client.createdAt,
+        });
+        backfilledCount++;
+      }
+    }
+
+    return backfilledCount;
   }
 }
 

@@ -130,6 +130,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stage History endpoints
+  app.get("/api/clients/:id/stage-history", async (req, res) => {
+    try {
+      const history = await storage.getClientStageHistory(req.params.id);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stage history" });
+    }
+  });
+
+  app.get("/api/clients/:id/timeline", async (req, res) => {
+    try {
+      const timeline = await storage.getClientTimeline(req.params.id);
+      if (!timeline) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+      res.json(timeline);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch client timeline" });
+    }
+  });
+
+  app.get("/api/analytics/stages", async (_req, res) => {
+    try {
+      const analytics = await storage.getStageAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stage analytics" });
+    }
+  });
+
+  app.post("/api/analytics/backfill-stage-history", async (_req, res) => {
+    try {
+      const count = await storage.backfillStageHistory();
+      res.json({ 
+        success: true, 
+        message: `Backfilled stage history for ${count} clients`,
+        count 
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to backfill stage history" });
+    }
+  });
+
   app.get("/api/clients/export/template", (_req, res) => {
     try {
       const buffer = generateExcelTemplate();
@@ -226,8 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           const validatedData = insertClientSchema.parse(clientData);
-          const pipelineStartDate = new Date(client.lastFollowUp);
-          const createdClient = await storage.createClient({ ...validatedData, pipelineStartDate });
+          const createdClient = await storage.createClient(validatedData as any);
           createdClients.push(createdClient);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Validation failed";

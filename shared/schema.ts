@@ -89,6 +89,21 @@ export const activities = pgTable("activities", {
   clientIdx: index("activities_client_idx").on(table.clientId),
 }));
 
+// Stage history table for tracking pipeline stage transitions and duration analytics
+export const clientStageHistory = pgTable("client_stage_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clientId: varchar("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  stage: stageEnum("stage").notNull(),
+  enteredAt: timestamp("entered_at", { withTimezone: true }).notNull().defaultNow(),
+  exitedAt: timestamp("exited_at", { withTimezone: true }),
+  durationSeconds: integer("duration_seconds"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  clientIdx: index("stage_history_client_idx").on(table.clientId),
+  stageIdx: index("stage_history_stage_idx").on(table.stage),
+  enteredAtIdx: index("stage_history_entered_at_idx").on(table.enteredAt),
+}));
+
 // Relations
 export const servicesRelations = relations(services, ({ many }) => ({
   clients: many(clients),
@@ -119,6 +134,13 @@ export const activitiesRelations = relations(activities, ({ one }) => ({
   user: one(users, {
     fields: [activities.userId],
     references: [users.id],
+  }),
+}));
+
+export const clientStageHistoryRelations = relations(clientStageHistory, ({ one }) => ({
+  client: one(clients, {
+    fields: [clientStageHistory.clientId],
+    references: [clients.id],
   }),
 }));
 
@@ -292,3 +314,30 @@ export const defaultServices = [
   "Digital Marketing",
   "ITSM"
 ] as const;
+
+// Stage History types
+export const insertStageHistorySchema = createInsertSchema(clientStageHistory).omit({
+  id: true,
+  createdAt: true,
+  durationSeconds: true,
+});
+
+export type InsertStageHistory = z.infer<typeof insertStageHistorySchema>;
+export type StageHistory = typeof clientStageHistory.$inferSelect;
+
+// Stage analytics types
+export interface StageAnalytics {
+  stage: string;
+  averageDurationSeconds: number;
+  averageDurationDays: number;
+  totalClients: number;
+  completedClients: number;
+}
+
+export interface ClientStageTimeline {
+  clientId: string;
+  companyName: string;
+  stages: StageHistory[];
+  totalDurationDays: number;
+  currentStage: string;
+}
