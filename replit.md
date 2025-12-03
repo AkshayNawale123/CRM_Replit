@@ -1,235 +1,39 @@
 # Executive CRM Dashboard
 
 ## Overview
-
-This is an Executive CRM Dashboard application built to provide high-level visibility into client relationships, deal pipeline management, and sales tracking. The application follows Material Design principles adapted for enterprise data applications, offering a clean, professional interface for managing client information across different stages of the sales funnel.
-
-The system allows users to track clients from initial lead through to won deals, with comprehensive activity history, follow-up scheduling, and priority management. It provides executive-level metrics and a detailed table view for pipeline management.
+The Executive CRM Dashboard is a React-based application providing high-level visibility into client relationships, deal pipeline management, and sales tracking. It enables users to track clients from lead to won deals, offering comprehensive activity history, follow-up scheduling, and priority management. The system delivers executive metrics and a detailed table view for pipeline management, designed with Material Design principles for an enterprise data application.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
 ### Frontend Architecture
-
-**Framework**: React with TypeScript, using Vite as the build tool and development server.
-
-**UI Component Library**: Shadcn/ui (Radix UI primitives) with the "new-york" style variant, providing a comprehensive set of accessible, customizable components.
-
-**Styling**: Tailwind CSS with custom design tokens for colors, spacing, and typography. The design system uses CSS variables for theming with support for light/dark modes. Material Design principles guide the visual hierarchy with Inter as the primary font family.
-
-**State Management**: TanStack Query (React Query) for server state management, providing caching, background refetching, and optimistic updates. Local component state managed with React hooks.
-
-**Routing**: Wouter for lightweight client-side routing.
-
-**Form Handling**: React Hook Form with Zod for schema validation, ensuring type-safe form handling with comprehensive validation rules.
+The frontend is built with React and TypeScript, using Vite for development and bundling. It leverages Shadcn/ui (Radix UI primitives) with the "new-york" style variant for UI components and Tailwind CSS for styling, adhering to Material Design principles with support for light/dark modes. State management is handled by TanStack Query for server state and React hooks for local state. Wouter is used for lightweight client-side routing, and React Hook Form with Zod provides type-safe form handling and validation.
 
 ### Backend Architecture
-
-**Server Framework**: Express.js running on Node.js, configured as an ESM module.
-
-**API Design**: RESTful API with endpoints for CRUD operations on client data:
-- GET /api/clients - List all clients
-- GET /api/clients/:id - Get single client
-- POST /api/clients - Create new client
-- PUT /api/clients/:id - Update existing client
-- DELETE /api/clients/:id - Delete client
-
-**Data Validation**: Zod schemas shared between client and server for consistent validation.
-
-**Development Setup**: Custom Vite middleware integration for HMR (Hot Module Replacement) in development, with separate production build process.
+The backend is an Express.js application running on Node.js, providing a RESTful API for CRUD operations on client data. Zod schemas are shared between client and server for consistent data validation. Development utilizes custom Vite middleware for HMR.
 
 ### Data Storage
-
-**ORM**: Drizzle ORM configured for PostgreSQL dialect.
-
-**Database Schema**: Four core tables:
-
-**clients** table:
-- Client identification (id, company name, contact person, email, phone)
-- Sales pipeline tracking (stage, status, value)
-- Follow-up management (last follow-up, next follow-up dates)
-- Priority classification (High, Medium, Low)
-- Foreign keys: responsible_person_id (users), service_id (services)
-- Notes field for additional context
-
-**users** table:
-- Team members who manage client relationships
-- Fields: id, name, email, role (Sales Rep, Manager, Admin)
-- Used for Performance analytics view and activity tracking
-
-**activities** table:
-- Activity log for tracking all client interactions
-- Fields: id, client_id (FK), action, user_id (FK), created_at
-- Replaces legacy JSONB activity history with normalized table
-- Enables proper user-activity relationships and audit trail
-
-**services** table:
-- Available service offerings for clients
-- Default services: Product Development, CRM, ERP, Mobile Development, Website Creation, Digital Marketing, ITSM
-- Custom services can be added dynamically
-
-**Migration Strategy**: Drizzle Kit for schema migrations with push-based deployment.
-
-**Storage**: Database-only storage (DbStorage) - all data is persisted directly to PostgreSQL. No in-memory fallback. DATABASE_URL is required for the application to run.
+The application uses PostgreSQL as its primary data store, managed with Drizzle ORM. The database schema includes `clients`, `users`, `activities`, and `services` tables. Drizzle Kit is used for schema migrations, and all data is persisted directly to PostgreSQL (DbStorage), requiring a `DATABASE_URL`.
 
 ### Design System
+Typography utilizes the Inter font. Spacing is based on Tailwind's scale. Component patterns include metric cards, sortable/filterable data tables, badges, dialog modals, and toast notifications. The design is mobile-first with responsive layouts.
 
-**Typography**: Inter font from Google Fonts with weight variations (400, 500, 600, 700) used throughout the interface.
+### Technical Implementations
+- **Pipeline Tracker**: Comprehensive visual pipeline tracker with client selection, two view modes (Compact, Detailed Cards), progress bar, stage circles with wait times, outcome indicators, and responsive design with dark mode support.
+- **Stage Timeline Tracking**: Automatic tracking of stage entry/exit times via `client_stage_history` table. Records when clients move between pipeline stages (not status changes), calculates duration in each stage, and provides analytics on sales velocity and bottlenecks. API endpoints: `/api/analytics/stages` for aggregate metrics, `/api/clients/:id/stage-history` for client-specific timeline.
+- **Service Tracking**: Includes a `services` table, a `ServiceSelect` component for adding/selecting services, and service integration into client forms, reports, and details.
+- **Country-based Currency System**: Provides a searchable country dropdown that auto-selects currency, displays values with country-specific symbols, and supports country aliases.
+- **Analytics Dashboard**: Features 5 views (Overview, Pipeline, Performance, Geographic, Services) with various charts, KPIs, and metrics, all displaying values in INR using the currency conversion system. Includes service line insights, revenue comparison, and portfolio mix.
+- **User and Activity Logging**: Incorporates a `users` table for team members and an `activities` table for normalized, user-attributed activity logging.
+- **Client Portfolio UI Redesign**: Features a compact two-panel layout with a `ClientListPanel` for client cards with filtering/search, and a `ClientManagementPanel` for viewing/editing client details, notes, and activities.
+- **Excel Import/Export**: Functionality for importing client data via Excel (with template downloads and validation) and exporting is integrated, with buttons relocated to the navigation header.
 
-**Spacing System**: Tailwind's spacing scale with specific units (2, 4, 6, 8, 12, 16, 20) for consistent spacing patterns.
+## External Dependencies
 
-**Component Patterns**:
-- Metric cards for KPI display with icon support and variant-based styling
-- Data tables with sorting, filtering, and responsive design
-- Badge components for stage, status, and priority visualization
-- Dialog modals for create/edit/detail views
-- Toast notifications for user feedback
-
-**Responsive Design**: Mobile-first approach with breakpoint-based layouts, horizontal scrolling tables on mobile devices.
-
-### External Dependencies
-
-**UI Components**: 
-- Radix UI primitives (@radix-ui/*) for accessible, unstyled component foundations
-- Lucide React for iconography
-- CMDK for command palette functionality
-- Embla Carousel for carousel components
-- Vaul for drawer components
-
-**Database**:
-- Neon serverless PostgreSQL (@neondatabase/serverless)
-- Drizzle ORM for type-safe database operations
-- Connect-pg-simple for PostgreSQL session storage (configured but not actively used in current implementation)
-
-**Utilities**:
-- date-fns for date formatting and manipulation
-- class-variance-authority (CVA) for component variant management
-- clsx and tailwind-merge for conditional className composition
-- Zod for runtime type validation
-- Nanoid for unique ID generation
-
-**Development Tools**:
-- Replit-specific plugins for development experience (cartographer, dev-banner, runtime-error-modal)
-- TSX for TypeScript execution in development
-- ESBuild for production bundling
-
-**Query Management**:
-- TanStack Query for data fetching, caching, and synchronization with configurable retry logic and stale time management
-
-## Recent Changes
-
-### December 3, 2025
-
-- **Enhanced Pipeline Tracker Component**: Implemented a comprehensive visual pipeline tracker based on user requirements
-  - **PipelineTracker Component** (`client/src/components/pipeline-tracker.tsx`): Full-featured tracker with:
-    - Client selector for selecting and viewing any client's pipeline progress
-    - Two view modes: Compact View (horizontal stage strip) and Detailed Cards (grid layout)
-    - Progress bar showing completion percentage
-    - Stage circles with stage numbers, names, and expected wait times
-    - Won/Lost outcome indicators with visual highlighting
-    - Status badge display with color-coded indicators
-    - Fully responsive with mobile-optimized layouts
-    - Comprehensive data-testid attributes for testing
-  - **SimplePipelineTracker Component**: Lightweight version for backward compatibility in existing components
-  - **New Pipeline Page** (`client/src/pages/pipeline.tsx`): Dedicated page accessible from navigation
-    - Shows all clients with client selector
-    - Full pipeline visualization with view mode toggle
-    - Navigation link added with GitBranch icon
-  - **Terminal State Handling**: Won stage shows all previous stages as completed with 100% progress; Lost stage shows all stages as incomplete with 0% progress
-  - **Stage Wait Times**: Each stage displays expected wait time (e.g., Lead: 24-48h, POC: 1-3w, Contract Review: 5-10d)
-  - **Dark Mode Support**: Full dark mode compatibility across all pipeline components
-
-### November 27, 2025
-
-- **Service Tracking System**: Implemented comprehensive service tracking feature
-  - New `services` table in database to store available services
-  - Default services: Product Development, CRM, ERP, Mobile Development, Website Creation, Digital Marketing, ITSM
-  - ServiceSelect component with searchable dropdown and ability to add new services dynamically
-  - Service field added to Add/Edit Client form
-  - Service column added to Reports table (sortable)
-  - Service field displayed in Client Details dialog
-  - Excel import/export template updated to include Service column
-  - API endpoints: GET /api/services, POST /api/services
-  - Custom services can be added on-the-fly from the dropdown
-
-- **Country-based Currency System**: Implemented comprehensive currency handling
-  - Added searchable country dropdown with 50+ countries and their currencies
-  - Auto-selects currency based on country (e.g., United States → USD, India → INR)
-  - Value displays use country-specific currency symbols ($, £, €, ¥, د.إ, etc.) across all components:
-    - Client list panel (compact format with K/M suffixes)
-    - Client details dialog (full format)
-    - Client management panel (Deal Value section)
-    - Reports table
-  - Country alias support for common abbreviations (UAE, USA, UK)
-  - Exchange rates stored in `client/src/lib/country-currency-data.ts`
-
-- **Value (in INR) Column in Reports**: Added INR conversion column
-  - Displays all deal values converted to Indian Rupees for standardized reporting
-  - Sortable column for comparing deals across different currencies
-  - Conversion uses stored exchange rates from country-currency data
-
-- **Days in Pipeline Calculation**: Updated to use `pipelineStartDate` field
-  - For Excel imports: Uses the "Last Follow-up" date as the pipeline start date
-  - For manual "Add Client": Uses the creation date (today's date)
-  - This allows imported clients to show accurate pipeline duration based on when they actually entered the pipeline, not when they were imported into the system
-
-- **Excel Template Updates**: Enhanced instructions for currency handling
-  - Country field must match supported country names exactly
-  - Value stored in local currency (currency auto-detected from country)
-  - Service field added with default options and ability to add custom services
-
-- **Analytics Dashboard**: New comprehensive analytics page with 5 views
-  - **Overview**: KPI cards (Active Pipeline, Win Rate, Avg Won Deal, Avg Cycle Time), Pipeline by Stage chart, Cycle Time Distribution, Priority Distribution pie chart, Action Items (high priority follow-ups, stalled negotiations, conversion opportunities)
-  - **Pipeline**: Sales Funnel visualization (active pipeline stages only), Deal Health scatter plot (days in pipeline vs deal value)
-  - **Performance**: Team performance bar chart, individual team member cards with deals, pipeline value, won deals, and avg deal size
-  - **Geographic**: Country-wise distribution charts, individual country cards with deal counts and values
-  - **Services**: Comprehensive service analytics view with:
-    - Service Line Insights: Highlight cards showing Highest Revenue service, Best Win Rate service, and Largest Average Deal size service
-    - Service Line Revenue Comparison: Horizontal bar chart comparing pipeline values across all services (color-coded)
-    - Service Portfolio Mix: Two pie charts showing distribution by pipeline value and by deal count
-    - Service Overview Cards: Individual cards for each service showing active deals, pipeline value, avg deal size, avg cycle time, won deals, and win rate
-    - Service Performance Metrics Table: Comprehensive sortable table with all service KPIs (deals, pipeline value, avg deal size, won, win rate, avg cycle)
-  - All values displayed in INR using the country-currency conversion system
-  - Navigation: Create Client → Reports → Analytics → Glossary
-  - **Metrics Separation**: Active pipeline metrics (stage charts, funnel, cycle time) only include non-Won/Lost deals; Win rate and Avg Won Deal calculated from closed deals (Won + Lost)
-
-- **Service Badge in Client Details**: Service now displays as a cyan-colored badge next to stage, status, and priority badges in client details view
-
-- **Database-Only Storage**: Removed all in-memory storage code
-  - Removed MemStorage class and all associated Map-based data storage
-  - Application now saves all data directly to PostgreSQL database
-  - DATABASE_URL environment variable is required for the application to run
-  - Reports and Analytics pages fetch data from database in real-time
-  - Auto-refresh on data changes: When clients are created, updated, deleted, or imported via Excel, all views (Dashboard, Reports, Analytics) automatically refresh using TanStack Query cache invalidation
-
-- **Users and Activity Logging System**: Fully implemented user management and activity tracking
-  - **Users table**: 8 sample team members (2 Managers, 6 Sales Reps) with email and role
-  - Team members: Sarah Johnson (Manager), Robert Williams (Manager), Michael Chen, Emily Rodriguez, David Kim, Jessica Patel, Amanda Foster, James Thompson (Sales Reps)
-  - **Activities table**: Normalized activity logging with user attribution
-  - 125+ activity records linked to users and clients
-  - Activities include stage-appropriate actions (discovery calls, demos, proposals, contract reviews, etc.)
-  - All 50 clients have assigned responsible persons for proper Performance analytics
-  - Storage layer automatically creates users when adding activities or assigning responsible persons
-
-- **Client Portfolio UI Redesign**: Compact two-panel layout for maximum data visibility
-  - **ClientListPanel** (left panel): 
-    - Compact client cards with company, contact, value (formatted with currency), stage/priority badges, and country
-    - Filter popover with stage/priority dropdowns (replaces separate filter bar)
-    - Search functionality and client count display
-    - Add Client button accessible in header
-  - **ClientManagementPanel** (right panel):
-    - **View mode**: Header with company name, contact info, Edit and Close buttons; horizontal badge row showing Stage, Priority, Service, Status; two-column Contact/Deal information layout; combined Notes & Activities section with timeline; NO action bar buttons
-    - **Edit mode**: Full edit form with delete button and confirmation dialog
-  - Currency label updated to "Deal Value (Currency as per Country)"
-  - Country alias support (USA, UK, UAE abbreviations) for robust currency lookup
-  - Full CRUD functionality preserved (create, read, update, delete accessible from UI via edit mode)
-
-- **Excel Import/Export Buttons Relocated**: Moved to navigation header for cleaner layout
-  - Download Template and Upload Excel buttons now in navigation bar, next to Logout button
-  - Removed the large Excel Import/Export card from dashboard header
-  - Dashboard content shifted upward for better viewport utilization
-  - All Excel functionality preserved (template download, file upload, import validation, toast notifications)
-  - New `ExcelButtons` component in `client/src/components/excel-buttons.tsx`
+- **UI Components**: Radix UI primitives, Lucide React, CMDK, Embla Carousel, Vaul.
+- **Database**: Neon serverless PostgreSQL, Drizzle ORM, connect-pg-simple.
+- **Utilities**: date-fns, class-variance-authority (CVA), clsx, tailwind-merge, Zod, Nanoid.
+- **Development Tools**: Replit-specific plugins, TSX, ESBuild.
+- **Query Management**: TanStack Query.
