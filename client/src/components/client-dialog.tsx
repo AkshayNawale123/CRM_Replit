@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, statusOptions, priorityOptions } from "@shared/schema";
+import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, priorityOptions, getStatusOptionsForStage } from "@shared/schema";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -48,6 +48,18 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       notes: "",
     },
   });
+
+  // Watch the stage field to dynamically filter status options
+  const selectedStage = form.watch("stage");
+  const availableStatuses = getStatusOptionsForStage(selectedStage);
+
+  // Reset status when stage changes and current status is not valid for new stage
+  useEffect(() => {
+    const currentStatus = form.getValues("status");
+    if (currentStatus && !availableStatuses.includes(currentStatus)) {
+      form.setValue("status", null);
+    }
+  }, [selectedStage, availableStatuses]);
 
   useEffect(() => {
     if (open && client) {
@@ -238,7 +250,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {statusOptions.map((status) => (
+                          {availableStatuses.map((status) => (
                             <SelectItem 
                               key={status ?? 'none'} 
                               value={status ?? "__none__"} 

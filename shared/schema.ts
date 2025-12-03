@@ -256,6 +256,25 @@ export const statusOptions = [
 ] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;
 
+// Stage to Status mapping - defines which statuses are valid for each pipeline stage
+export const stageStatusMapping: Record<string, (string | null)[]> = {
+  "Lead": [null, "Awaiting Response"],
+  "Qualified": [null, "Under Evaluation", "Pending Review"],
+  "Meeting Scheduled": [null, "Awaiting Response"],
+  "Demo Completed": [null, "Under Evaluation", "Awaiting Response"],
+  "Proof of Concept (POC)": [null, "In Negotiation", "Under Evaluation", "Pending Review"],
+  "Proposal Sent": [null, "Pending Review", "Under Evaluation", "On Hold"],
+  "Verbal Commitment": [null, "Budget Approval Pending", "Pending Review"],
+  "Contract Review": [null, "In Negotiation", "Pending Review", "On Hold"],
+  "Won": [null],
+  "Lost": [null, "Proposal Rejected", "On Hold"]
+};
+
+// Helper function to get valid statuses for a given stage
+export function getStatusOptionsForStage(stage: string): (string | null)[] {
+  return stageStatusMapping[stage] || [null];
+}
+
 export const insertServiceSchema = createInsertSchema(services).omit({
   id: true,
   createdAt: true,

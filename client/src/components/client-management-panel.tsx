@@ -26,8 +26,8 @@ import {
   type InsertClient,
   type Client,
   stageOptions,
-  statusOptions,
   priorityOptions,
+  getStatusOptionsForStage,
 } from "@shared/schema";
 import { format } from "date-fns";
 import {
@@ -106,6 +106,18 @@ export function ClientManagementPanel({
       notes: "",
     },
   });
+
+  // Watch the stage field to dynamically filter status options
+  const selectedStage = form.watch("stage");
+  const availableStatuses = getStatusOptionsForStage(selectedStage);
+
+  // Reset status when stage changes and current status is not valid for new stage
+  useEffect(() => {
+    const currentStatus = form.getValues("status");
+    if (currentStatus && !availableStatuses.includes(currentStatus)) {
+      form.setValue("status", null);
+    }
+  }, [selectedStage, availableStatuses]);
 
   useEffect(() => {
     if (client && (mode === "view" || mode === "edit")) {
@@ -539,7 +551,7 @@ export function ClientManagementPanel({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {statusOptions.map((status) => (
+                            {availableStatuses.map((status) => (
                               <SelectItem
                                 key={status ?? "none"}
                                 value={status ?? "__none__"}
