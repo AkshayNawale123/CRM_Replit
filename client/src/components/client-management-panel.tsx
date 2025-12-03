@@ -60,6 +60,7 @@ import { useState, useEffect } from "react";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
+import { PipelineTracker } from "./pipeline-tracker";
 import crmBackgroundImage from "@assets/Cybaem_Tech_CRM_1763559987158.png";
 
 interface ClientManagementPanelProps {
@@ -220,10 +221,15 @@ export function ClientManagementPanel({
         <div className="p-4 border-b bg-background">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="text-xl font-bold truncate" data-testid="text-client-name">
+              <h2
+                className="text-xl font-bold truncate"
+                data-testid="text-client-name"
+              >
                 {client.companyName}
               </h2>
-              <p className="text-sm text-muted-foreground">{client.contactPerson}</p>
+              <p className="text-sm text-muted-foreground">
+                {client.contactPerson}
+              </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button
@@ -234,7 +240,12 @@ export function ClientManagementPanel({
               >
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={onCancel} data-testid="button-close-client">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCancel}
+                data-testid="button-close-client"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -244,14 +255,22 @@ export function ClientManagementPanel({
             <StageBadge stage={client.stage as any} />
             <PriorityBadge priority={client.priority as any} />
             {client.service && (
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700"
               >
                 {client.service}
               </Badge>
             )}
             <StatusBadge status={client.status as any} />
+          </div>
+          
+          {/* Pipeline Progress Tracker */}
+          <div className="mt-4">
+            <PipelineTracker 
+              currentStage={client.stage} 
+              currentStatus={client.status} 
+            />
           </div>
         </div>
 
@@ -290,22 +309,32 @@ export function ClientManagementPanel({
                   <div className="flex items-start gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground">Country</div>
-                      <div className="text-sm font-medium">{client.country}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Country
+                      </div>
+                      <div className="text-sm font-medium">
+                        {client.country}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <User className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground">Responsible Person</div>
-                      <div className="text-sm font-medium">{client.responsiblePerson}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Responsible Person
+                      </div>
+                      <div className="text-sm font-medium">
+                        {client.responsiblePerson}
+                      </div>
                     </div>
                   </div>
                   {client.linkedin && (
                     <div className="flex items-start gap-3">
                       <Globe className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div>
-                        <div className="text-xs text-muted-foreground">LinkedIn</div>
+                        <div className="text-xs text-muted-foreground">
+                          LinkedIn
+                        </div>
                         <a
                           href={client.linkedin}
                           target="_blank"
@@ -330,8 +359,13 @@ export function ClientManagementPanel({
                   <div className="flex items-start gap-3">
                     <div className="h-4 w-4 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground">Deal Value</div>
-                      <div className="text-xl font-bold" data-testid="text-deal-value">
+                      <div className="text-xs text-muted-foreground">
+                        Deal Value
+                      </div>
+                      <div
+                        className="text-xl font-bold"
+                        data-testid="text-deal-value"
+                      >
                         {formatCurrencyByCountry(client.value, client.country)}
                       </div>
                     </div>
@@ -346,15 +380,23 @@ export function ClientManagementPanel({
                   <div className="flex items-start gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground">Last Follow-up</div>
-                      <div className="text-sm font-medium">{formatDate(client.lastFollowUp)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Last Follow-up
+                      </div>
+                      <div className="text-sm font-medium">
+                        {formatDate(client.lastFollowUp)}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground">Next Follow-up</div>
-                      <div className="text-sm font-medium">{formatDate(client.nextFollowUp)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Next Follow-up
+                      </div>
+                      <div className="text-sm font-medium">
+                        {formatDate(client.nextFollowUp)}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -367,7 +409,7 @@ export function ClientManagementPanel({
                 <FileText className="h-4 w-4" />
                 Notes & Activities
               </h3>
-              
+
               {/* Notes */}
               {client.notes ? (
                 <div className="bg-muted/30 rounded-md p-3">
@@ -397,7 +439,10 @@ export function ClientManagementPanel({
                         <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <span className="font-medium">{activity.action}</span>
-                          <span className="text-muted-foreground"> by {activity.user}</span>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            by {activity.user}
+                          </span>
                         </div>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {activity.date}
@@ -442,9 +487,16 @@ export function ClientManagementPanel({
                     name="companyName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company Name <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Company Name{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Acme Corporation" {...field} data-testid="input-company-name" />
+                          <Input
+                            placeholder="Acme Corporation"
+                            {...field}
+                            data-testid="input-company-name"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -456,9 +508,16 @@ export function ClientManagementPanel({
                     name="contactPerson"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contact Person <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Contact Person{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="John Smith" {...field} data-testid="input-contact-person" />
+                          <Input
+                            placeholder="John Smith"
+                            {...field}
+                            data-testid="input-contact-person"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -472,7 +531,9 @@ export function ClientManagementPanel({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Email <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -491,7 +552,9 @@ export function ClientManagementPanel({
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Phone <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="tel"
@@ -512,14 +575,16 @@ export function ClientManagementPanel({
                     name="stage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stage <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Stage <span className="text-destructive">*</span>
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-stage">
-                              <SelectValue placeholder="Select stage" />
+                              <SelectValue placeholder="Select Stage" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -542,12 +607,14 @@ export function ClientManagementPanel({
                       <FormItem>
                         <FormLabel>Status</FormLabel>
                         <Select
-                          onValueChange={(value) => field.onChange(value === "__none__" ? null : value)}
+                          onValueChange={(value) =>
+                            field.onChange(value === "__none__" ? null : value)
+                          }
                           value={field.value ?? "__none__"}
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-status">
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select Status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -571,7 +638,9 @@ export function ClientManagementPanel({
                     name="priority"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Priority <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Priority <span className="text-destructive">*</span>
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -601,7 +670,9 @@ export function ClientManagementPanel({
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Country <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <CountrySelect
                             value={field.value}
@@ -619,7 +690,10 @@ export function ClientManagementPanel({
                     name="value"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Deal Value (Currency as per Country) <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Deal Value (Currency as per Country){" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -643,9 +717,16 @@ export function ClientManagementPanel({
                     name="responsiblePerson"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Responsible Person <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Responsible Person{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Sarah Johnson" {...field} data-testid="input-responsible-person" />
+                          <Input
+                            placeholder="Sarah Johnson"
+                            {...field}
+                            data-testid="input-responsible-person"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -657,7 +738,10 @@ export function ClientManagementPanel({
                     name="service"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Interested In <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Service Interested In{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <ServiceSelect
                             value={field.value || ""}
@@ -677,7 +761,10 @@ export function ClientManagementPanel({
                     name="lastFollowUp"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Follow-up <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Last Follow-up{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="date"
@@ -698,7 +785,10 @@ export function ClientManagementPanel({
                     name="nextFollowUp"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Next Follow-up <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>
+                          Next Follow-up{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="date"
@@ -763,7 +853,12 @@ export function ClientManagementPanel({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isLoading} className="flex-1" data-testid="button-submit">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-1"
+                    data-testid="button-submit"
+                  >
                     {isLoading
                       ? "Saving..."
                       : mode === "create"
