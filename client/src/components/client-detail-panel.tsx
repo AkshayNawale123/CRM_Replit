@@ -21,7 +21,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Client } from "@shared/schema";
 import { PriorityBadge } from "./priority-badge";
 import { StageBadge } from "./stage-badge";
-import { StatusBadge } from "./status-badge";
 import { SimplePipelineTracker } from "./pipeline-tracker";
 import { useToast } from "@/hooks/use-toast";
 import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
@@ -175,7 +174,6 @@ export function ClientDetailPanel({ client, isOpen, onClose }: ClientDetailPanel
               
               <div className="flex flex-wrap gap-2 items-center">
                 <StageBadge stage={client.stage as any} />
-                <StatusBadge status={client.status as any} />
                 <PriorityBadge priority={client.priority as any} />
               </div>
             </div>
