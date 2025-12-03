@@ -442,7 +442,7 @@ export function ClientManagementPanel({
                     name="companyName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company Name</FormLabel>
+                        <FormLabel>Company Name <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Acme Corporation" {...field} data-testid="input-company-name" />
                         </FormControl>
@@ -456,7 +456,7 @@ export function ClientManagementPanel({
                     name="contactPerson"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contact Person</FormLabel>
+                        <FormLabel>Contact Person <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="John Smith" {...field} data-testid="input-contact-person" />
                         </FormControl>
@@ -472,7 +472,7 @@ export function ClientManagementPanel({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -491,7 +491,7 @@ export function ClientManagementPanel({
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone</FormLabel>
+                        <FormLabel>Phone <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="tel"
@@ -512,7 +512,7 @@ export function ClientManagementPanel({
                     name="stage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stage</FormLabel>
+                        <FormLabel>Stage <span className="text-destructive">*</span></FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -571,7 +571,7 @@ export function ClientManagementPanel({
                     name="priority"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Priority</FormLabel>
+                        <FormLabel>Priority <span className="text-destructive">*</span></FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -601,7 +601,7 @@ export function ClientManagementPanel({
                     name="country"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country</FormLabel>
+                        <FormLabel>Country <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <CountrySelect
                             value={field.value}
@@ -619,7 +619,7 @@ export function ClientManagementPanel({
                     name="value"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Deal Value (Currency as per Country)</FormLabel>
+                        <FormLabel>Deal Value (Currency as per Country) <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -643,7 +643,7 @@ export function ClientManagementPanel({
                     name="responsiblePerson"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Responsible Person</FormLabel>
+                        <FormLabel>Responsible Person <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Sarah Johnson" {...field} data-testid="input-responsible-person" />
                         </FormControl>
@@ -657,7 +657,7 @@ export function ClientManagementPanel({
                     name="service"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Service Interested In</FormLabel>
+                        <FormLabel>Service Interested In <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <ServiceSelect
                             value={field.value || ""}
@@ -677,7 +677,7 @@ export function ClientManagementPanel({
                     name="lastFollowUp"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Follow-up</FormLabel>
+                        <FormLabel>Last Follow-up <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="date"
@@ -698,7 +698,7 @@ export function ClientManagementPanel({
                     name="nextFollowUp"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Next Follow-up</FormLabel>
+                        <FormLabel>Next Follow-up <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="date"

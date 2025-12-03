@@ -136,7 +136,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="companyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Name</FormLabel>
+                      <FormLabel>Company Name <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Acme Corporation" 
@@ -154,7 +154,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="contactPerson"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact Person</FormLabel>
+                      <FormLabel>Contact Person <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="John Smith" 
@@ -174,7 +174,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="email"
@@ -193,7 +193,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Phone <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="tel"
@@ -214,7 +214,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="stage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Stage</FormLabel>
+                      <FormLabel>Stage <span className="text-destructive">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-stage">
@@ -271,7 +271,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Priority</FormLabel>
+                      <FormLabel>Priority <span className="text-destructive">*</span></FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-priority">
@@ -297,7 +297,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Deal Value (Currency as per Country)</FormLabel>
+                    <FormLabel>Deal Value (Currency as per Country) <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -318,7 +318,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="responsiblePerson"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Responsible Person</FormLabel>
+                      <FormLabel>Responsible Person <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Sarah Johnson" 
@@ -336,7 +336,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel>Country <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <CountrySelect
                           value={field.value}
@@ -355,7 +355,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                 name="service"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service</FormLabel>
+                    <FormLabel>Service <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <ServiceSelect
                         value={field.value}
@@ -374,7 +374,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="lastFollowUp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Follow-up</FormLabel>
+                      <FormLabel>Last Follow-up <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="date" 
@@ -393,7 +393,7 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   name="nextFollowUp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Next Follow-up</FormLabel>
+                      <FormLabel>Next Follow-up <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="date" 
