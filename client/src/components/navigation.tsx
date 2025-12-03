@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, FileText, BookOpen, LogOut, BarChart3 } from "lucide-react";
+import { LayoutDashboard, FileText, BookOpen, LogOut, BarChart3, GitBranch } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { ExcelButtons } from "@/components/excel-buttons";
 
@@ -42,6 +42,17 @@ export function Navigation() {
           >
             <BarChart3 className="h-4 w-4" />
             Analytics
+          </Button>
+        </Link>
+        <Link href="/pipeline">
+          <Button
+            variant={location === "/pipeline" ? "default" : "ghost"}
+            size="sm"
+            className="gap-2"
+            data-testid="nav-pipeline"
+          >
+            <GitBranch className="h-4 w-4" />
+            Pipeline
           </Button>
         </Link>
         <Link href="/glossary">

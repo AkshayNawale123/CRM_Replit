@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/context/auth-context";
 import Dashboard from "@/pages/dashboard";
 import Reports from "@/pages/reports";
 import Analytics from "@/pages/analytics";
+import Pipeline from "@/pages/pipeline";
 import Glossary from "@/pages/glossary";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/reports" component={Reports} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/pipeline" component={Pipeline} />
       <Route path="/glossary" component={Glossary} />
       <Route component={NotFound} />
     </Switch>

@@ -121,6 +121,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### December 3, 2025
+
+- **Enhanced Pipeline Tracker Component**: Implemented a comprehensive visual pipeline tracker based on user requirements
+  - **PipelineTracker Component** (`client/src/components/pipeline-tracker.tsx`): Full-featured tracker with:
+    - Client selector for selecting and viewing any client's pipeline progress
+    - Two view modes: Compact View (horizontal stage strip) and Detailed Cards (grid layout)
+    - Progress bar showing completion percentage
+    - Stage circles with stage numbers, names, and expected wait times
+    - Won/Lost outcome indicators with visual highlighting
+    - Status badge display with color-coded indicators
+    - Fully responsive with mobile-optimized layouts
+    - Comprehensive data-testid attributes for testing
+  - **SimplePipelineTracker Component**: Lightweight version for backward compatibility in existing components
+  - **New Pipeline Page** (`client/src/pages/pipeline.tsx`): Dedicated page accessible from navigation
+    - Shows all clients with client selector
+    - Full pipeline visualization with view mode toggle
+    - Navigation link added with GitBranch icon
+  - **Terminal State Handling**: Won stage shows all previous stages as completed with 100% progress; Lost stage shows all stages as incomplete with 0% progress
+  - **Stage Wait Times**: Each stage displays expected wait time (e.g., Lead: 24-48h, POC: 1-3w, Contract Review: 5-10d)
+  - **Dark Mode Support**: Full dark mode compatibility across all pipeline components
+
 ### November 27, 2025
 
 - **Service Tracking System**: Implemented comprehensive service tracking feature

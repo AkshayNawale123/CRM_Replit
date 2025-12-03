@@ -60,7 +60,7 @@ import { useState, useEffect } from "react";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
-import { PipelineTracker } from "./pipeline-tracker";
+import { SimplePipelineTracker } from "./pipeline-tracker";
 import crmBackgroundImage from "@assets/Cybaem_Tech_CRM_1763559987158.png";
 
 interface ClientManagementPanelProps {
@@ -267,7 +267,7 @@ export function ClientManagementPanel({
           
           {/* Pipeline Progress Tracker */}
           <div className="mt-4">
-            <PipelineTracker 
+            <SimplePipelineTracker 
               currentStage={client.stage} 
               currentStatus={client.status} 
             />

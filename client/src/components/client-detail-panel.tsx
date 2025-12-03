@@ -22,7 +22,7 @@ import type { Client } from "@shared/schema";
 import { PriorityBadge } from "./priority-badge";
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
-import { PipelineTracker } from "./pipeline-tracker";
+import { SimplePipelineTracker } from "./pipeline-tracker";
 import { useToast } from "@/hooks/use-toast";
 import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
 
@@ -182,10 +182,9 @@ export function ClientDetailPanel({ client, isOpen, onClose }: ClientDetailPanel
 
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Pipeline Progress</h4>
-              <PipelineTracker 
+              <SimplePipelineTracker 
                 currentStage={client.stage} 
                 currentStatus={client.status} 
-                compact={true}
               />
             </div>
 
