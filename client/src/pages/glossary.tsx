@@ -7,10 +7,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Clock, Search, ChevronDown, ChevronUp, Printer, Download } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp } from "lucide-react";
 
 const pipelineTableData = [
   {
@@ -86,7 +84,6 @@ const pipelineTableData = [
 ];
 
 function PipelineReferenceGuide() {
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -107,13 +104,7 @@ function PipelineReferenceGuide() {
     }
   };
 
-  const filteredData = pipelineTableData.filter(row => 
-    row.stage.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row.statuses.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    row.waitTime.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const sortedData = [...filteredData].sort((a, b) => {
+  const sortedData = [...pipelineTableData].sort((a, b) => {
     if (!sortColumn) return 0;
     
     let aValue: string | number = a[sortColumn as keyof typeof a] as string | number;
@@ -131,26 +122,6 @@ function PipelineReferenceGuide() {
     }
   });
 
-  const handleExportCSV = () => {
-    const headers = ['Stage', 'Possible Status', 'Ideal Wait Time', 'Action / Notes'];
-    const rows = pipelineTableData.map(row => [
-      row.stage,
-      row.statuses.join('; '),
-      row.waitTime,
-      row.action
-    ]);
-    
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'pipeline_reference_guide.csv';
-    link.click();
-  };
-
   return (
     <Card id="pipeline-reference">
       <CardHeader>
@@ -160,18 +131,6 @@ function PipelineReferenceGuide() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search stages, statuses, or wait times..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-            data-testid="input-pipeline-search"
-          />
-        </div>
-
         <div className="border rounded-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -319,23 +278,6 @@ function PipelineReferenceGuide() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 flex-wrap">
-          <Button 
-            variant="outline"
-            onClick={() => window.print()}
-            data-testid="button-print-reference"
-          >
-            <Printer className="w-4 h-4 mr-2" />
-            Print Reference
-          </Button>
-          <Button 
-            onClick={handleExportCSV}
-            data-testid="button-export-csv"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export to CSV
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
