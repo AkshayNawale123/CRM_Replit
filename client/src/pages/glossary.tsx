@@ -7,7 +7,339 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/navigation";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Clock, Search, ChevronDown, ChevronUp, Printer, Download } from "lucide-react";
+
+const pipelineTableData = [
+  {
+    stage: "Lead",
+    statuses: ["None", "Awaiting Response"],
+    waitTime: "24-48 hours",
+    waitDays: 1,
+    action: "Immediate follow-up required after initial contact"
+  },
+  {
+    stage: "Qualified",
+    statuses: ["Under Evaluation", "Pending Review"],
+    waitTime: "2-3 days",
+    waitDays: 2.5,
+    action: "Allow time for internal stakeholder alignment"
+  },
+  {
+    stage: "Meeting Scheduled",
+    statuses: ["Awaiting Response"],
+    waitTime: "1-5 days",
+    waitDays: 3,
+    action: "Wait for meeting confirmation or reschedule"
+  },
+  {
+    stage: "Demo Completed",
+    statuses: ["Under Evaluation", "Awaiting Response"],
+    waitTime: "3-5 days",
+    waitDays: 4,
+    action: "Give time to assess demo and discuss internally"
+  },
+  {
+    stage: "Proof of Concept (POC)",
+    statuses: ["In Negotiation", "Under Evaluation", "Pending Review"],
+    waitTime: "1-3 weeks",
+    waitDays: 14,
+    action: "Technical validation period - check weekly"
+  },
+  {
+    stage: "Proposal Sent",
+    statuses: ["Pending Review", "Under Evaluation", "On Hold"],
+    waitTime: "5-7 days",
+    waitDays: 6,
+    action: "Proposal review and comparison with alternatives"
+  },
+  {
+    stage: "Verbal Commitment",
+    statuses: ["Budget Approval Pending", "Pending Review"],
+    waitTime: "3-5 days",
+    waitDays: 4,
+    action: "Awaiting formal approval and budget sign-off"
+  },
+  {
+    stage: "Contract Review",
+    statuses: ["In Negotiation", "Pending Review", "On Hold"],
+    waitTime: "5-10 days",
+    waitDays: 7.5,
+    action: "Legal review and terms negotiation"
+  },
+  {
+    stage: "Won",
+    statuses: ["None"],
+    waitTime: "N/A",
+    waitDays: 0,
+    action: "Contract signed - begin onboarding process"
+  },
+  {
+    stage: "Lost",
+    statuses: ["Proposal Rejected", "On Hold"],
+    waitTime: "N/A",
+    waitDays: 0,
+    action: "Document learnings and maintain relationship"
+  }
+];
+
+function PipelineReferenceGuide() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const getWaitTimeVariant = (waitTime: string): "default" | "secondary" | "outline" | "destructive" => {
+    if (waitTime === "N/A") return "secondary";
+    if (waitTime.includes("hours") || waitTime.includes("1-3 days") || waitTime.includes("2-3 days")) 
+      return "default";
+    if (waitTime.includes("week")) return "destructive";
+    return "outline";
+  };
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const filteredData = pipelineTableData.filter(row => 
+    row.stage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.statuses.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    row.waitTime.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    let aValue: string | number = a[sortColumn as keyof typeof a] as string | number;
+    let bValue: string | number = b[sortColumn as keyof typeof b] as string | number;
+    
+    if (sortColumn === 'statuses') {
+      aValue = a.statuses.length;
+      bValue = b.statuses.length;
+    }
+    
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  const handleExportCSV = () => {
+    const headers = ['Stage', 'Possible Status', 'Ideal Wait Time', 'Action / Notes'];
+    const rows = pipelineTableData.map(row => [
+      row.stage,
+      row.statuses.join('; '),
+      row.waitTime,
+      row.action
+    ]);
+    
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'pipeline_reference_guide.csv';
+    link.click();
+  };
+
+  return (
+    <Card id="pipeline-reference">
+      <CardHeader>
+        <CardTitle className="text-xl">Pipeline Stage Reference Guide</CardTitle>
+        <CardDescription>
+          Complete breakdown of stages, statuses, and ideal wait times
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search stages, statuses, or wait times..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+            data-testid="input-pipeline-search"
+          />
+        </div>
+
+        <div className="border rounded-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-primary text-primary-foreground">
+                <tr>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer hover-elevate"
+                    onClick={() => handleSort('stage')}
+                    data-testid="th-stage"
+                  >
+                    <div className="flex items-center gap-2">
+                      Stage
+                      {sortColumn === 'stage' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer hover-elevate"
+                    onClick={() => handleSort('statuses')}
+                    data-testid="th-statuses"
+                  >
+                    <div className="flex items-center gap-2">
+                      Possible Status
+                      {sortColumn === 'statuses' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer hover-elevate"
+                    onClick={() => handleSort('waitDays')}
+                    data-testid="th-waittime"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Ideal Wait Time
+                      {sortColumn === 'waitDays' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Action / Notes
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {sortedData.map((row, index) => (
+                  <tr key={index} className="hover-elevate" data-testid={`row-pipeline-${index}`}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="rounded-full h-7 w-7 flex items-center justify-center text-xs">
+                          {index + 1}
+                        </Badge>
+                        <span className="font-medium text-foreground">{row.stage}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {row.statuses.map((status, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {status}
+                          </Badge>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={getWaitTimeVariant(row.waitTime)} className="gap-1">
+                        <Clock className="w-3 h-3" />
+                        {row.waitTime}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
+                      {row.action}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-md p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <h3 className="font-semibold text-green-900 dark:text-green-100">Fast Response</h3>
+            </div>
+            <p className="text-sm text-green-700 dark:text-green-300">Lead through Demo: 24 hours - 5 days</p>
+          </div>
+
+          <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-md p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              <h3 className="font-semibold text-orange-900 dark:text-orange-100">Evaluation Period</h3>
+            </div>
+            <p className="text-sm text-orange-700 dark:text-orange-300">POC & Proposal: 1-3 weeks</p>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100">Legal/Admin</h3>
+            </div>
+            <p className="text-sm text-blue-700 dark:text-blue-300">Commitment & Contract: 3-10 days</p>
+          </div>
+        </div>
+
+        <div className="bg-muted/50 rounded-md p-4 space-y-4">
+          <h3 className="font-bold text-foreground">Follow-up Best Practices</h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="flex items-start gap-3">
+              <Badge variant="outline" className="rounded-full h-6 w-6 flex items-center justify-center text-xs flex-shrink-0">1</Badge>
+              <div>
+                <p className="font-medium text-foreground">After Wait Period Expires</p>
+                <p className="text-muted-foreground">Follow up immediately with value-added content</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Badge variant="outline" className="rounded-full h-6 w-6 flex items-center justify-center text-xs flex-shrink-0">2</Badge>
+              <div>
+                <p className="font-medium text-foreground">No Response After 2-3 Attempts</p>
+                <p className="text-muted-foreground">Reassess lead quality and priority</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Badge variant="outline" className="rounded-full h-6 w-6 flex items-center justify-center text-xs flex-shrink-0">3</Badge>
+              <div>
+                <p className="font-medium text-foreground">"On Hold" Status</p>
+                <p className="text-muted-foreground">Weekly check-ins to maintain relationship</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Badge variant="outline" className="rounded-full h-6 w-6 flex items-center justify-center text-xs flex-shrink-0">4</Badge>
+              <div>
+                <p className="font-medium text-foreground">Adjust for Deal Size</p>
+                <p className="text-muted-foreground">Larger deals may need longer wait times</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 flex-wrap">
+          <Button 
+            variant="outline"
+            onClick={() => window.print()}
+            data-testid="button-print-reference"
+          >
+            <Printer className="w-4 h-4 mr-2" />
+            Print Reference
+          </Button>
+          <Button 
+            onClick={handleExportCSV}
+            data-testid="button-export-csv"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export to CSV
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Glossary() {
   const [activeSection, setActiveSection] = useState<string>("primary-stages");
@@ -139,6 +471,7 @@ export default function Glossary() {
     { id: "status-definitions", label: "Status Definitions" },
     { id: "stage-vs-status", label: "Stage vs Status Classification" },
     { id: "bant-framework", label: "BANT Framework" },
+    { id: "pipeline-reference", label: "Pipeline Stage Reference Guide" },
   ];
 
   // Track visible sections with IntersectionObserver
@@ -166,6 +499,7 @@ export default function Glossary() {
         "status-definitions",
         "stage-vs-status",
         "bant-framework",
+        "pipeline-reference",
       ];
       sectionIds.forEach((id) => {
         const element = document.getElementById(id);
@@ -457,6 +791,8 @@ export default function Glossary() {
               </div>
             </CardContent>
           </Card>
+
+          <PipelineReferenceGuide />
         </main>
       </div>
     </div>
