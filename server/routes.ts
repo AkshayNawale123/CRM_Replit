@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertClientSchema, addActivitySchema, insertServiceSchema } from "@shared/schema";
 import { generateExcelTemplate, parseExcelFile, validateExcelFile } from "./excel-utils";
+import { seedDatabase } from "./seed-data";
 import multer from "multer";
 
 interface MulterRequest extends Request {
@@ -295,6 +296,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Import error:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to import clients";
       res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Seed database endpoint (for development/testing)
+  app.post("/api/seed", async (_req, res) => {
+    try {
+      await seedDatabase();
+      res.json({ success: true, message: "Database seeded with 50 sample clients" });
+    } catch (error) {
+      console.error("Seed error:", error);
+      res.status(500).json({ error: "Failed to seed database" });
     }
   });
 
