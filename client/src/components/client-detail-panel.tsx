@@ -279,6 +279,21 @@ export function ClientDetailPanel({ client, isOpen, onClose }: ClientDetailPanel
                     </div>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Source</div>
+                    <div className="text-sm font-medium" data-testid="panel-source">
+                      {client.source || '-'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Industry</div>
+                    <div className="text-sm font-medium" data-testid="panel-industry">
+                      {client.industry || '-'}
+                    </div>
+                  </div>
+                </div>
                 
                 <div className="flex items-center gap-3">
                   <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />

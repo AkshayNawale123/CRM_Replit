@@ -58,7 +58,9 @@ export function ClientListPanel({ clients, selectedClientId, onSelectClient, onA
           (client.status && client.status.toLowerCase().includes(query)) ||
           client.priority.toLowerCase().includes(query) ||
           client.country.toLowerCase().includes(query) ||
-          (client.responsiblePerson && client.responsiblePerson.toLowerCase().includes(query))
+          (client.responsiblePerson && client.responsiblePerson.toLowerCase().includes(query)) ||
+          (client.source && client.source.toLowerCase().includes(query)) ||
+          (client.industry && client.industry.toLowerCase().includes(query))
       );
     }
 
@@ -212,6 +214,18 @@ export function ClientListPanel({ clients, selectedClientId, onSelectClient, onA
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="h-3 w-3" />
                   <span>{client.country}</span>
+                  {client.source && (
+                    <>
+                      <span className="mx-1">|</span>
+                      <span>{client.source}</span>
+                    </>
+                  )}
+                  {client.industry && (
+                    <>
+                      <span className="mx-1">|</span>
+                      <span className="truncate max-w-[100px]">{client.industry}</span>
+                    </>
+                  )}
                 </div>
               </button>
             ))

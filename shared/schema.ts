@@ -195,6 +195,8 @@ export const clientFormSchema = z.object({
   notes: z.string().optional().default(""),
   lastFollowUp: z.string().min(1, "Last follow-up date is required"),
   nextFollowUp: z.string().min(1, "Next follow-up date is required"),
+  source: z.enum(["Referral", "Website", "Event", "Cold Outreach", "Partner", "Other"]).optional().default("Other"),
+  industry: z.string().optional().default(""),
 });
 
 export type ClientFormData = z.infer<typeof clientFormSchema>;
@@ -277,6 +279,7 @@ export const statusOptions = [
   "Budget Approval Pending"
 ] as const;
 export const priorityOptions = ["High", "Medium", "Low"] as const;
+export const sourceOptions = ["Referral", "Website", "Event", "Cold Outreach", "Partner", "Other"] as const;
 
 // Stage to Status mapping - defines which statuses are valid for each pipeline stage
 export const stageStatusMapping: Record<string, (string | null)[]> = {

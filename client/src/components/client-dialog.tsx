@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, priorityOptions, getStatusOptionsForStage } from "@shared/schema";
+import { clientFormSchema, type ClientFormData, type InsertClient, type Client, stageOptions, priorityOptions, sourceOptions, getStatusOptionsForStage } from "@shared/schema";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -46,6 +46,8 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
       service: "",
       linkedin: "",
       notes: "",
+      source: "Other" as const,
+      industry: "",
     },
   });
 
@@ -79,6 +81,8 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         service: client.service || "",
         linkedin: client.linkedin || "",
         notes: client.notes || "",
+        source: (client.source as ClientFormData["source"]) || "Other",
+        industry: client.industry || "",
       });
     } else if (open && !client) {
       form.reset({
@@ -97,6 +101,8 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
         service: "",
         linkedin: "",
         notes: "",
+        source: "Other",
+        industry: "",
       });
     }
   }, [open, client]);
@@ -367,6 +373,51 @@ export function ClientDialog({ open, onOpenChange, onSubmit, onDelete, client, i
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="source"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Source</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || "Other"}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-source">
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {sourceOptions.map((source) => (
+                            <SelectItem key={source} value={source} data-testid={`option-source-${source.toLowerCase().replace(/\s+/g, '-')}`}>
+                              {source}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Technology, Healthcare, Finance..." 
+                          {...field} 
+                          data-testid="input-industry"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
