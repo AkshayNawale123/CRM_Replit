@@ -12,10 +12,14 @@ type Status =
   | "Budget Approval Pending";
 
 interface StatusBadgeProps {
-  status: Status | string;
+  status: Status | string | null;
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  if (!status) {
+    return null;
+  }
+
   const getStatusConfig = () => {
     switch (status) {
       case "In Negotiation":
