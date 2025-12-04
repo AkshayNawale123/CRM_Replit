@@ -215,7 +215,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: validation.error });
       }
 
-      const parsedClients = parseExcelFile(req.file.buffer);
+      const parseResult = parseExcelFile(req.file.buffer);
+      const { clients: parsedClients, warnings } = parseResult;
       
       if (parsedClients.length === 0) {
         return res.status(400).json({ error: "No data found in the Excel file" });
@@ -267,6 +268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             lastFollowUp: client.lastFollowUp,
             nextFollowUp: client.nextFollowUp,
             activityHistory: [],
+            source: client.source,
+            industry: client.industry,
+            estimatedCloseDate: client.estimatedCloseDate,
+            winProbability: client.winProbability,
           };
           
           const validatedData = insertClientSchema.parse(clientData);
@@ -283,6 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imported: createdClients.length,
         total: parsedClients.length,
         errors,
+        warnings,
         clients: createdClients,
       });
     } catch (error) {

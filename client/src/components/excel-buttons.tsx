@@ -4,11 +4,18 @@ import { Download, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
+interface ValidationWarning {
+  row: number;
+  field: string;
+  warning: string;
+}
+
 interface ImportResult {
   success: boolean;
   imported: number;
   total: number;
-  errors: { row: number; error: string }[];
+  errors: { row: number; field?: string; error: string }[];
+  warnings?: ValidationWarning[];
 }
 
 export function ExcelButtons() {
@@ -81,6 +88,15 @@ export function ExcelButtons() {
         toast({
           title: "Import Successful",
           description: `Successfully imported ${result.imported} of ${result.total} clients.`,
+        });
+      }
+
+      if (result.warnings && result.warnings.length > 0) {
+        const warningCount = result.warnings.length;
+        const firstWarning = result.warnings[0];
+        toast({
+          title: "Import Completed with Warnings",
+          description: `${warningCount} row(s) have stage-status compatibility issues. Row ${firstWarning.row}: ${firstWarning.warning}`,
         });
       }
 
