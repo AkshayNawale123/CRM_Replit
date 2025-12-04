@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Check, X, Clock, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Check, X, Clock, TrendingUp, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import type { Client } from '@shared/schema';
 
 interface PipelineTrackerProps {
@@ -50,6 +52,7 @@ export function PipelineTracker({
 }: PipelineTrackerProps) {
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>(defaultViewMode);
   const [internalSelectedClient, setInternalSelectedClient] = useState<Client | null>(null);
+  const [clientSelectorOpen, setClientSelectorOpen] = useState(false);
 
   const activeClient = selectedClient ?? internalSelectedClient;
   const currentStage = propCurrentStage ?? activeClient?.stage ?? 'Lead';
@@ -277,23 +280,53 @@ export function PipelineTracker({
             <CardTitle className="text-sm font-bold" data-testid="client-selector-title">Select Client</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2" data-testid="client-selector-grid">
-              {clients.map(client => (
+            <Popover open={clientSelectorOpen} onOpenChange={setClientSelectorOpen}>
+              <PopoverTrigger asChild>
                 <Button
-                  key={client.id}
                   variant="outline"
-                  size="sm"
-                  onClick={() => handleClientSelect(client)}
-                  className={cn(
-                    "h-auto py-2 px-3 text-xs font-semibold transition-all justify-start",
-                    activeClient?.id === client.id && "border-primary bg-primary/10 text-primary"
-                  )}
-                  data-testid={`button-select-client-${client.id}`}
+                  role="combobox"
+                  aria-expanded={clientSelectorOpen}
+                  className="w-full justify-between"
+                  data-testid="button-client-selector-dropdown"
                 >
-                  <span className="truncate">{client.companyName}</span>
+                  {activeClient ? (
+                    <span className="truncate">{activeClient.companyName}</span>
+                  ) : (
+                    <span className="text-muted-foreground">Search and select a client...</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
-              ))}
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search clients..." data-testid="input-client-search" />
+                  <CommandList>
+                    <CommandEmpty>No client found.</CommandEmpty>
+                    <CommandGroup>
+                      {clients.map(client => (
+                        <CommandItem
+                          key={client.id}
+                          value={client.companyName}
+                          onSelect={() => {
+                            handleClientSelect(client);
+                            setClientSelectorOpen(false);
+                          }}
+                          data-testid={`option-client-${client.id}`}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              activeClient?.id === client.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <span className="truncate">{client.companyName}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
             {activeClient && (
               <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg border border-primary/20" data-testid="client-info-display">
