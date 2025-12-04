@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StageBadge } from "./stage-badge";
 import { StatusBadge } from "./status-badge";
 import { PriorityBadge } from "./priority-badge";
+import { OverdueBadge } from "./stage-timeline";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import type { Client } from "@shared/schema";
@@ -141,7 +142,14 @@ export function ClientTable({ clients, onRowClick, selectedClientId, sortField, 
                       </div>
                     </TableCell>
                     <TableCell className="py-2 px-3">
-                      <StageBadge stage={client.stage as any} />
+                      <div className="flex flex-wrap items-center gap-1">
+                        <StageBadge stage={client.stage as any} />
+                        <OverdueBadge 
+                          stage={client.stage} 
+                          enteredAt={client.createdAt} 
+                          pipelineStartDate={client.pipelineStartDate}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell className="py-2 px-3">
                       <StatusBadge status={client.status as any} />

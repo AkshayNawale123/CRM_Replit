@@ -22,6 +22,7 @@ import type { Client } from "@shared/schema";
 import { PriorityBadge } from "./priority-badge";
 import { StageBadge } from "./stage-badge";
 import { SimplePipelineTracker } from "./pipeline-tracker";
+import { StageTimeline } from "./stage-timeline";
 import { useToast } from "@/hooks/use-toast";
 import { convertToINR, formatINR, formatCurrencyByCountry } from "@/lib/country-currency-data";
 
@@ -185,6 +186,12 @@ export function ClientDetailPanel({ client, isOpen, onClose }: ClientDetailPanel
                 currentStatus={client.status} 
               />
             </div>
+
+            <StageTimeline 
+              clientId={client.id}
+              currentStage={client.stage}
+              currentStageEnteredAt={client.pipelineStartDate || client.createdAt}
+            />
 
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
